@@ -1,113 +1,92 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import HomeScreen from './screen/homeScreen';
+import StudyScreen from './screen/studyScreen';
+import LoginScreen from './screen/loginScreen';
+import RegistrationScreen from './screen/registrationScreen';
+import {TouchableOpacity, Text} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {headerStyle} from './public/styles';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-function Section({children, title}) {
-  const isDarkMode = useColorScheme() === 'dark';
+const Stack = createNativeStackNavigator();
+const HomeLeftHeader = () => {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <TouchableOpacity>
+      <Ionicons name="menu" size={24} color="#000" />
+    </TouchableOpacity>
   );
-}
-
-function App(){
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
+};
+const HomeRightHeader = () => {
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <>
+      <TouchableOpacity
+        style={headerStyle.homeRightHeaderStyle}
+        onPress={() => console.log('Notifications pressed!')}>
+        <Ionicons name="notifications" size={24} color="#000" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => console.log('Profile pressed!')}>
+        <Ionicons name="person-circle-outline" size={24} color="#000" />
+      </TouchableOpacity>
+    </>
   );
-}
+};
+const StudyingRightHeader = () => {
+  return (
+    <TouchableOpacity
+      style={headerStyle.studyingRightHeaderStyle}
+      onPress={() => console.log('허용 앱 pressed!')}>
+      <Ionicons name="checkmark-circle-outline" size={24} color="#000" />
+      <Text>허용앱</Text>
+    </TouchableOpacity>
+  );
+};
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+const App = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fdf7ff',
+          },
+          headerTintColor: '#000',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}>
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Registration"
+          component={RegistrationScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: '슈퍼눈떠봐',
+            headerBackVisible: false,
+            headerLeft: HomeLeftHeader,
+            headerRight: HomeRightHeader,
+          }}
+        />
+        <Stack.Screen
+          name="Study"
+          component={StudyScreen}
+          options={{
+            title: '학습 중',
+            headerRight: StudyingRightHeader,
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
 
 export default App;
