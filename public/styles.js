@@ -52,6 +52,11 @@ export const commonStyles = StyleSheet.create({
     color: '#fff',
     fontSize: height * 0.02,
   },
+  addButton: {
+    position: 'absolute',
+    bottom: 30,
+  },
+  addButtonIcon: width * 0.15,
   // 공통 스타일 정의
 });
 
@@ -135,7 +140,7 @@ export const homeStyles = StyleSheet.create({
     backgroundColor: '#00aaff',
     padding: width * 0.05,
     marginVertical: 10,
-    width: '90%',
+    width: width * 0.9,
     borderRadius: 8,
   },
   cardText: {
@@ -158,6 +163,80 @@ export const homeStyles = StyleSheet.create({
     bottom: 30,
   },
   addButtonIcon: width * 0.15,
+
+  //modal 추가
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 반투명 배경
+  },
+  modalContent: {
+    width: '80%', // 원하는 너비
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    elevation: 5, // 그림자 효과
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  modalOptionContent: {
+    width: '70%', // 원하는 너비
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    elevation: 5, // 그림자 효과
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalOptionTitle: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#FFF',
+    textAlign: 'center',
+  },
+  modalInput: {
+    width: '100%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  cancelButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#00aaff',
+    borderRadius: 5,
+    marginRight: 5,
+  },
+  submitButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#00aaff',
+    borderRadius: 5,
+    marginLeft: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
   // 홈 화면 특화 스타일
 });
 

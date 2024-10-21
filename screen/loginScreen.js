@@ -32,7 +32,7 @@ const LoginScreen = ({navigation}) => {
         <View style={loginStyles.buttonView}>
           <CustomButton
             navigation={navigation}
-            destination="Home"
+            destination="MainApp"
             text="로그인"
           />
           <CustomButton

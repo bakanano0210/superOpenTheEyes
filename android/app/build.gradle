@@ -105,6 +105,18 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+     // tasks.whenTaskAdded를 android 블록 아래에 추가
+    tasks.whenTaskAdded { task ->
+        if (task.name == 'generateDebugLintReportModel') {
+            task.dependsOn 'copyReactNativeVectorIconFonts'
+        }
+        // lintAnalyzeDebug 태스크에 copyReactNativeVectorIconFonts 태스크 의존성 추가
+        if (task.name == 'lintAnalyzeDebug') {
+        task.dependsOn 'copyReactNativeVectorIconFonts'
+        }
+
+    }
+    
 }
 
 dependencies {
