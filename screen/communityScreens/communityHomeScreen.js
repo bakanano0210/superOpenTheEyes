@@ -1,3 +1,4 @@
+// screen/CommunityScreens/communityHomeScreen
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -7,10 +8,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   useWindowDimensions,
+  Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {useRoute} from '@react-navigation/native';
+import {commonStyles} from '../../public/styles';
 const studyGroups = [
   {id: '1', name: '감자머리 신짱구', members: '38/50', leader: '그룹장'},
   {id: '2', name: '우당탕탕 코린이들', members: '3/3', leader: 'HDH'},
@@ -26,13 +29,11 @@ const tempStudyGroups = [
       leader: '그룹장',
     },
   },
-]
+];
 
 const renderItem = ({item}) => (
   <View style={styles.groupContainer}>
-    <View style={styles.iconPlaceholder}>
-      {/* 그룹 아이콘 */}
-    </View>
+    <View style={styles.iconPlaceholder}>{/* 그룹 아이콘 */}</View>
     <View style={styles.groupInfo}>
       <Text style={styles.groupName}>{item.name}</Text>
       <Text style={styles.groupDetails}>
@@ -42,25 +43,26 @@ const renderItem = ({item}) => (
   </View>
 );
 
-const StudyGroupTap = () => 
-{
-  const [addMode, setAddMode] = useState(false);  
-  <View style={{flex: 1, backgroundColor: '#ff4081'}}>
-    <TextInput style={styles.searchInput} placeholder="스터디 그룹명 입력..." />
-    <StudyGroupModal 
-    />
-    <FlatList
-      data={studyGroups}
-      renderItem={renderItem}
-      keyExtractor={item => item.id}
-    />
-  </View>
-}
+const StudyGroupTap = () => {
+  return (
+    <View style={{flex: 1, backgroundColor: '#ff4081'}}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="스터디 그룹명 입력..."
+      />
+      <FlatList
+        data={studyGroups}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+      />
+    </View>
+  );
+};
 
 const HelpRequestTap = () => (
   <View style={{flex: 1, backgroundColor: '#673ab7'}} />
 );
-const QuizTap = () => (<View style={{flex: 1, backgroundColor: '#000'}} />);
+const QuizTap = () => <View style={{flex: 1, backgroundColor: '#000'}} />;
 
 const renderScene = SceneMap({
   first: StudyGroupTap,
@@ -104,94 +106,7 @@ const renderTabBar = props => {
     />
   );
 };
-const StudyGroupModal = ({
-  visible,
-  onClose,
-  isEditMode = false,
-  initialStudyGroupTitle = '',
-  initialPeopleNumber = 1,
-  studyGroupCardInfoList,
-  setStudyGroupCardInfoList,
-  editingKey = null,
-}) => {
-  const [studyGroupTitle, setStudyGroupTitle] = useState('');
-  const [peopleNumber, setPeopleNumber] = useState(1);
 
-  useEffect(() => {
-    setPostTitle(initialStudyGroupTitle);
-  }, [initialStudyGroupTitle]);
-
-  useEffect(() => {
-    setPeopleNumber(initialPeopleNumber);
-  }, [initialPeopleNumber]);
-
-  const onChangeTitle = title => {
-    console.log(title);
-    setStudyGroupTitle(title);
-  };
-  
-  const onChangeNumber = number => {
-    console.log(number);
-    setPeopleNumber(number);
-  }
-
-  const handleSave = () => {
-    if (studyGroupTitle === '') {
-      Alert.alert('입력 오류', '입력되지 않는 요소가 있습니다.', [
-        {text: '확인'},
-      ]);
-      return;
-    }
-
-    if (isEditMode) {
-      const updatedList = studyGroupCardInfoList.map(item =>
-        item.key === editingKey
-          ? {...item, studyGroupInfo: {...item.studyGroupInfo, title: studyGroupTitle}}
-          : item,
-      );
-      setStudyGroupCardInfoList(updatedList);
-    } else {
-      const currentTime = Date.now().toString();
-      const key = `${studyGroupTitle}_${currentTime}`;
-      const newStudyGroupInfo = {
-        key: key,
-        studyGroupInfo: {
-          title: studyGroupTitle,
-          members: peopleNumber,
-          leader: '그룹장' // 생성 사용자의 닉네임을 읽어올 예정
-        },
-      };
-      console.log(newStudyGroupInfo);
-      setStudyGroupCardInfoList([...studyGroupCardInfoList, newStudyGroupInfo]);
-    }
-    setStudyGroupTitle('');
-    setPeopleNumber(1);
-    onClose();
-  };
-
-  return (
-    <Modal transparent visible={visible} animationType="fade">
-      <View style={homeStyles.modalOverlay}>
-        <View style={[homeStyles.modalContent]}>
-          <Text style={homeStyles.modalTitle}>과목 명</Text>
-          <TextInput
-            style={homeStyles.modalInput}
-            placeholder="과목을 입력하세요"
-            value={subjectTitle}
-            onChangeText={onChangeTitle}
-          />
-          <TouchableOpacity
-            style={homeStyles.submitButton}
-            onPress={handleSave}>
-            <Text style={homeStyles.buttonText}>
-              {isEditMode ? '수정' : '등록'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 const CommunityHomeScreen = () => {
   const route = useRoute();
   const {initialIndex = 0} = route.params || {};
@@ -210,16 +125,23 @@ const CommunityHomeScreen = () => {
   ]);
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, paddingHorizontal: 10}}>
       <TabView
         navigationState={{index, routes}}
         renderScene={renderScene}
         onIndexChange={setIndex}
         initialLayout={{width: layout.width}}
         renderTabBar={renderTabBar}
+        style={{flex: 10}}
       />
-      <TouchableOpacity style={styles.addButton}>
-        <Ionicons name="add-circle" size={48} color="blue" />
+
+      <TouchableOpacity
+        style={{alignSelf: 'center', position: 'absolute', bottom: 30}}>
+        <Ionicons
+          name="add-circle"
+          size={commonStyles.addButtonIcon}
+          color="#014099"
+        />
       </TouchableOpacity>
     </View>
   );
@@ -283,11 +205,6 @@ const styles = StyleSheet.create({
   groupDetails: {
     fontSize: 14,
     color: '#666',
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
   },
 });
 

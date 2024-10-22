@@ -1,21 +1,18 @@
-// screen/homeScreen.js
+// screen/homeScreens/homeScreen.js
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, Alert} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {commonStyles, homeStyles} from '../../public/styles';
-import { SubjectModal, SubjectOptionModal, SubjectCard } from '../../component/Subject';
+import {
+  SubjectModal,
+  SubjectOptionModal,
+  SubjectCard,
+} from '../../component/Subject';
 
 const HomeScreen = ({navigation}) => {
   const [subjectCardInfoList, setSubjectCardInfoList] = useState([]);
-  const [addMode, setAddMode] = useState(false);
+  const [mode, setMode] = useState(null);
   const [modalOptionVisible, setModalOptionVisible] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -51,12 +48,12 @@ const HomeScreen = ({navigation}) => {
   return (
     <View style={homeStyles.homeContainer}>
       <SubjectModal
-        visible={addMode}
+        visible={mode !== null}
         onClose={() => {
-          setAddMode(false);
+          setMode(null);
           setModalOptionVisible(false);
         }}
-        isEditMode={editMode}
+        isEditMode={mode === 'edit'}
         initialTitle={selectedItem?.subjectInfo?.title || ''}
         subjectCardInfoList={subjectCardInfoList}
         setSubjectCardInfoList={setSubjectCardInfoList}
@@ -66,8 +63,7 @@ const HomeScreen = ({navigation}) => {
         visible={modalOptionVisible}
         onClose={() => setModalOptionVisible(false)}
         onEdit={() => {
-          setEditMode(true);
-          setAddMode(true);
+          setMode('edit');
           setEditingKey(selectedItem.key);
         }}
         onDelete={() => handleDelete(selectedItem.key)}
@@ -93,10 +89,7 @@ const HomeScreen = ({navigation}) => {
       )}
       <TouchableOpacity
         style={commonStyles.addButton}
-        onPress={() => {
-          setAddMode(true);
-          setEditMode(false);
-        }}>
+        onPress={() => setMode('add')}>
         <Ionicons
           name="add-circle-outline"
           size={commonStyles.addButtonIcon}

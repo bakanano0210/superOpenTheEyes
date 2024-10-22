@@ -57,6 +57,33 @@ export const commonStyles = StyleSheet.create({
     bottom: 30,
   },
   addButtonIcon: width * 0.15,
+  menuContainer: {
+    flex: 1,
+    position: 'absolute',
+    top: 50, // HomeLeftHeader 아래에 위치하도록 조정
+    left: 10, // 필요에 따라 조정
+    width: width * 0.3,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  menuButton: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 5,
+    paddingVertical: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  menuText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   // 공통 스타일 정의
 });
 
