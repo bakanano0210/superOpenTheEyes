@@ -1,13 +1,23 @@
 // screen/homeScreens/homeScreen.js
 import React, {useState, useEffect} from 'react';
-import {View, Text, TouchableOpacity, ScrollView, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {commonStyles, homeStyles} from '../../public/styles';
+import {commonStyles} from '../../public/styles';
 import {
   SubjectModal,
   SubjectOptionModal,
   SubjectCard,
-} from '../../component/Subject';
+} from '../../component/subject';
+
+const {width} = Dimensions.get('window');
 
 const HomeScreen = ({navigation}) => {
   const [subjectCardInfoList, setSubjectCardInfoList] = useState([]);
@@ -46,7 +56,7 @@ const HomeScreen = ({navigation}) => {
   }, []);
 
   return (
-    <View style={homeStyles.homeContainer}>
+    <View style={styles.homeContainer}>
       <SubjectModal
         visible={mode !== null}
         onClose={() => {
@@ -68,7 +78,7 @@ const HomeScreen = ({navigation}) => {
         }}
         onDelete={() => handleDelete(selectedItem.key)}
       />
-      <Text style={homeStyles.timer}>01:59:32</Text>
+      <Text style={styles.timer}>01:59:32</Text>
 
       {subjectCardInfoList.length === 0 ? null : (
         <ScrollView>
@@ -99,5 +109,21 @@ const HomeScreen = ({navigation}) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  homeContainer: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingTop: width * 0.1,
+  },
+  timer: {
+    fontSize: width * 0.15,
+    fontWeight: 'bold',
+    color: '#0056b3',
+    marginBottom: width * 0.1,
+  },
+  // 홈 화면 특화 스타일
+});
 
 export default HomeScreen;

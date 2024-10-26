@@ -2,21 +2,6 @@ import {StyleSheet, Dimensions} from 'react-native';
 
 const {width, height} = Dimensions.get('window');
 
-export const headerStyle = StyleSheet.create({
-  homeRightHeaderStyle: {
-    marginRight: 5,
-  },
-  studyingRightHeaderStyle: {
-    backgroundColor: '#e8def8',
-    marginRight: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 5,
-  },
-  //헤더 스타일 정의
-});
 export const commonStyles = StyleSheet.create({
   title: {
     fontSize: height * 0.03,
@@ -51,17 +36,18 @@ export const commonStyles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: height * 0.02,
+    fontWeight: 'bold',
   },
   addButton: {
     position: 'absolute',
-    bottom: 30,
+    bottom: width * 0.1,
   },
   addButtonIcon: width * 0.15,
   menuContainer: {
     flex: 1,
     position: 'absolute',
     top: 50, // HomeLeftHeader 아래에 위치하도록 조정
-    left: 10, // 필요에 따라 조정
+    left: 10,
     width: width * 0.3,
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -87,184 +73,99 @@ export const commonStyles = StyleSheet.create({
   // 공통 스타일 정의
 });
 
-export const loginStyles = StyleSheet.create({
-  loginContainer: {
+export const CommunityStyles = StyleSheet.create({
+  communityContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: width * 0.05,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
   },
-  upContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  downContainer: {
-    flex: 1,
-  },
-  downContainerContentStyle: {
-    flexGrow: 1,
-  },
-  forgotPassword: {
-    color: '#000000',
-  },
-  checkboxSize: width * 0.05,
-  label: {
-    marginLeft: width * 0.02,
-    color: '#000000',
-    lineHeight: width * 0.06,
-  },
-  checkboxIconStyle: {
-    alignSelf: 'center',
-  },
-  checkboxStyle: {
-    alignItems: 'center',
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: width * 0.9,
-    marginBottom: height * 0.025,
-    alignItems: 'center',
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-  },
-  buttonView: {
-    flex: 3,
-    justifyContent: 'center',
-  },
-  loginButtonStyle: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-  },
-  loginText: {
-    color: '#000000',
-    fontSize: height * 0.015,
-  },
-  // 로그인 화면 특화 스타일
-});
-
-export const homeStyles = StyleSheet.create({
-  homeContainer: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingTop: 50,
-  },
-  timer: {
-    fontSize: width * 0.15,
-    fontWeight: 'bold',
-    color: '#0056b3',
-    marginBottom: 20,
-  },
-  card: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#00aaff',
-    padding: width * 0.05,
-    marginVertical: 10,
-    width: width * 0.9,
-    borderRadius: 8,
+    marginBottom: 16,
   },
-  cardText: {
-    fontSize: width * 0.06,
-    color: '#fff',
-  },
-  cardTime: {
-    fontSize: width * 0.06,
-    color: '#fff',
-  },
-  cardRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardIconLeftMargin: {
-    marginLeft: 10,
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: 30,
-  },
-  addButtonIcon: width * 0.15,
-
-  //modal 추가
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 반투명 배경
-  },
-  modalContent: {
-    width: '80%', // 원하는 너비
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    elevation: 5, // 그림자 효과
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalOptionContent: {
-    width: '70%', // 원하는 너비
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    elevation: 5, // 그림자 효과
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalTitle: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+  },
+  tab: {
+    fontSize: 16,
+    color: 'black',
+  },
+  searchInput: {
+    flex: 1,
+  },
+  groupContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  iconPlaceholder: {
+    width: 50,
+    height: 50,
+    backgroundColor: '#eee',
+    borderRadius: 25,
+    marginRight: 16,
+  },
+  groupInfo: {
+    flex: 1,
+  },
+  groupName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  groupDetails: {
+    fontSize: 14,
+    color: '#666',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 10,
   },
-  modalOptionTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#FFF',
+  modalSubtitle: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  modalDescription: {
+    fontSize: 14,
+    marginBottom: 20,
     textAlign: 'center',
   },
-  modalInput: {
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
+  modalButton: {
+    backgroundColor: '#014099',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    fontSize: 30,
-    fontWeight: 'bold',
   },
-  modalButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#00aaff',
-    borderRadius: 5,
-    marginRight: 5,
-  },
-  submitButton: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#00aaff',
-    borderRadius: 5,
-    marginLeft: 5,
-  },
-  buttonText: {
+  modalButtonText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
-  // 홈 화면 특화 스타일
 });
 
 export const studyingStyles = StyleSheet.create({

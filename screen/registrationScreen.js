@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
-import {CustomButton, CustomLoginInput} from '../component/Custom';
+import {CustomButton, CustomLoginInput} from '../component/custom';
 import {loginStyles, commonStyles} from '../public/styles';
 
 const RegistrationScreen = ({navigation}) => {

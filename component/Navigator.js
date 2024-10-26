@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -10,12 +10,9 @@ import StudyScreen from '../screen/studyScreen';
 import AddAllowedAppScreen from '../screen/addAllowedAppScreen';
 import ProfileScreen from '../screen/profileScreen';
 import NotificationScreen from '../screen/notificationScreens/notificationScreen';
-import {
-  HomeLeftHeader,
-  HomeRightHeader,
-  StudyingRightHeader,
-} from '../component/Header';
-import {CustomMenu} from '../component/Custom';
+import {HomeLeftHeader, HomeRightHeader, StudyingRightHeader} from './header';
+import {CustomMenu} from './custom';
+import {useMainContext} from './mainContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -28,6 +25,7 @@ const icons = {
 const TabBarIcon = ({name, color, size}) => {
   return <Ionicons name={name} size={size} color={color} />;
 };
+
 const getScreenOptions = route => ({
   headerShown: false,
   tabBarShowLabel: false,
@@ -41,25 +39,36 @@ const getScreenOptions = route => ({
   },
   tabBarActiveTintColor: '#014099', // 활성화된 탭 색상
   tabBarInactiveTintColor: '#858585', // 비활성화된 탭 색상
-  tabBarIcon: ({focused, color, size = 24}) => (
+  tabBarIcon: ({color, size = 24}) => (
     <TabBarIcon name={icons[route.name]} color={color} size={size} />
   ),
 });
+
 export const BottomTabNavigator = () => {
+  const {setMenuVisible} = useMainContext();
+  const tabEvent = () => setMenuVisible(false);
   return (
     <Tab.Navigator screenOptions={({route}) => getScreenOptions(route)}>
-      <Tab.Screen name="HomeStack" component={HomeScreen} />
-      <Tab.Screen name="Community" component={CommunityHomeScreen} />
-      <Tab.Screen name="Ranking" component={RankingScreen} />
+      <Tab.Screen
+        name="HomeStack"
+        component={HomeScreen}
+        listeners={{tabPress: tabEvent}}
+      />
+      <Tab.Screen
+        name="Community"
+        component={CommunityStackNavigator}
+        listeners={{tabPress: tabEvent}}
+      />
+      <Tab.Screen
+        name="Ranking"
+        component={RankingScreen}
+        listeners={{tabPress: tabEvent}}
+      />
     </Tab.Navigator>
   );
 };
 
-export const MainStackNavigator = ({menuVisible, setMenuVisible}) => {
-  const headerLeft = useCallback(
-    () => <HomeLeftHeader onPress={() => setMenuVisible(!menuVisible)} />,
-    [menuVisible, setMenuVisible],
-  );
+export const MainStackNavigator = () => {
   return (
     <>
       <Stack.Navigator
@@ -69,15 +78,15 @@ export const MainStackNavigator = ({menuVisible, setMenuVisible}) => {
           headerStyle: {backgroundColor: '#fdf7ff'},
           headerTintColor: '#000',
           headerTitleStyle: {fontWeight: 'bold'},
+          headerRight: HomeRightHeader,
         }}>
         <Stack.Screen
           name="Tab"
           component={BottomTabNavigator}
-          options={() => ({
+          options={{
             title: '슈퍼눈떠봐',
-            headerRight: HomeRightHeader,
-            headerLeft: headerLeft,
-          })}
+            headerLeft: HomeLeftHeader,
+          }}
         />
         <Stack.Screen
           name="Study"
@@ -87,16 +96,28 @@ export const MainStackNavigator = ({menuVisible, setMenuVisible}) => {
             headerRight: StudyingRightHeader,
           }}
         />
-        <Stack.Screen name="허용앱" component={AddAllowedAppScreen} />
+        <Stack.Screen
+          name="허용앱"
+          component={AddAllowedAppScreen}
+          options={{}}
+        />
         <Stack.Screen name="프로필" component={ProfileScreen} />
         {/* 나중에 프로필에 로그아웃 아이콘 추가할 것*/}
         <Stack.Screen name="알림" component={NotificationScreen} />
       </Stack.Navigator>
-      <CustomMenu
-        visible={menuVisible}
-        onClose={() => setMenuVisible(false)}
-        navigation={null}
-      />
+      <CustomMenu />
     </>
+  );
+};
+
+const CommunityStackNavigator = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="CommunityHome"
+        component={CommunityHomeScreen}
+        options={{headerShown: false}}
+      />
+    </Stack.Navigator>
   );
 };
