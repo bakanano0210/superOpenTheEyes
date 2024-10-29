@@ -1,15 +1,13 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Text, TextInput, TouchableOpacity, View} from 'react-native';
 import {commonStyles} from '../public/styles';
 import {useNavigation} from '@react-navigation/native';
 
 import {useMainContext} from './mainContext';
 
-export const CustomButton = ({navigation, destination, text}) => {
+export const CustomButton = ({onPress, text, style}) => {
   return (
-    <TouchableOpacity
-      style={commonStyles.button}
-      onPress={() => navigation.navigate(destination)}>
+    <TouchableOpacity style={commonStyles.button} onPress={onPress}>
       <Text style={commonStyles.buttonText}>{text}</Text>
     </TouchableOpacity>
   );
@@ -32,10 +30,6 @@ export const CustomMenuButton = ({title, onPress}) => (
 
 export const CustomMenu = () => {
   const {menuVisible, setMenuVisible} = useMainContext();
-
-  useEffect(() => {
-    console.log('CustomMenu rendered, menuVisible:', menuVisible);
-  }, [menuVisible]);
   const navigation = useNavigation();
   const handleNavigate = (routeName, initialIndex = 0) => {
     setMenuVisible(false);
@@ -75,4 +69,7 @@ export const CustomMenu = () => {
       />
     </View>
   );
+};
+export const handleNavigate = ({navigation}, destination) => {
+  navigation.navigate(destination); // 원하는 화면으로 이동
 };

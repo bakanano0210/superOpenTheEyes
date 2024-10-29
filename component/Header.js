@@ -50,6 +50,19 @@ export const StudyingRightHeader = () => {
     </TouchableOpacity>
   );
 };
+export const ProfileRightHeader = () => {
+  console.log('ProfileRightHeader Called');
+  return (
+    <TouchableOpacity onPress={() => console.log('로그아웃 pressed!')}>
+      <Ionicons
+        name="log-out-outline"
+        size={24}
+        color="#000"
+        style={styles.icon}
+      />
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   homeRightHeaderStyle: {
@@ -57,12 +70,15 @@ const styles = StyleSheet.create({
   },
   studyingRightHeaderStyle: {
     backgroundColor: '#e8def8',
-    marginRight: width * 0.025,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: width * 0.05,
-    paddingVertical: width * 0.05,
+    padding: 10,
     borderRadius: 5,
+  },
+  icon: {
+    textShadowColor: '#000', // 그림자 색상
+    textShadowOffset: {width: 1, height: 1}, // 그림자 위치
+    textShadowRadius: 1, // 그림자 강도
   },
   //헤더 스타일 정의
 });

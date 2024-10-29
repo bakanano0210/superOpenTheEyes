@@ -9,32 +9,46 @@ import {
   useWindowDimensions,
   Modal,
   Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  ScrollView,
+  Image,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {useRoute} from '@react-navigation/native';
 import {commonStyles, CommunityStyles} from '../../public/styles';
+import {CustomButton} from '../../component/custom';
 
+const {width, height} = Dimensions.get('window');
 const tempUserId = 'user123';
 
 const StudyGroupTap = () => {
   const [studyGroups, setStudyGroups] = useState([
     {
       id: '1',
-      userId: '1',
-      name: '감자머리 신짱구',
-      members: '38/50',
-      leader: '그룹장',
+      studyGroupInfo: {
+        leaderId: '1',
+        name: '감자머리 신짱구',
+        members: '38/50',
+        leaderName: '그룹장',
+        url: '',
+      },
     },
     {
       id: '2',
-      userId: 'user123',
-      name: '우당탕탕 코린이들',
-      members: '3/3',
-      leader: 'HDH',
+      studyGroupInfo: {
+        leaderId: 'user123',
+        name: '우당탕탕 코린이들',
+        members: '3/3',
+        leaderName: 'HDH',
+        url: '',
+      },
     },
   ]);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const handleDelete = id => {
     Alert.alert('삭제 확인', '이 항목을 삭제하시겠습니까?', [
       {text: '취소', style: 'cancel'},
@@ -48,13 +62,33 @@ const StudyGroupTap = () => {
       },
     ]);
   };
+
+  const handleSaveGroup = () => {
+    if (isEditMode) {
+      const updatedGroups = studyGroups.map(group =>
+        group.id === selectedGroup.id
+          ? {...selectedGroup, ...group.studyGroupInfo}
+          : group,
+      );
+      setStudyGroups(updatedGroups);
+    } else {
+    }
+  };
   const renderItem = ({item}) => (
     <View style={CommunityStyles.groupContainer}>
-      <View style={CommunityStyles.iconPlaceholder}>{/* 그룹 아이콘 */}</View>
+      <View style={CommunityStyles.iconPlaceholder}>
+        <Image
+          source={require('../../assets/exampleImg.png')}
+          resizeMode="contain"
+          style={{width: 48, height: 48}}
+        />
+      </View>
       <View style={CommunityStyles.groupInfo}>
         <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
-          <Text style={CommunityStyles.groupName}>{item.name}</Text>
-          {item.userId === tempUserId && (
+          <Text style={CommunityStyles.groupName}>
+            {item.studyGroupInfo.name}
+          </Text>
+          {item.studyGroupInfo.leaderId === tempUserId && (
             <TouchableOpacity onPress={() => handleDelete(item.id)}>
               <Ionicons name="close" size={24} color="black" />
             </TouchableOpacity>
@@ -69,11 +103,13 @@ const StudyGroupTap = () => {
           }}>
           <View>
             <Text style={CommunityStyles.groupDetails}>
-              {item.members} {item.leader}
+              {item.studyGroupInfo.members}
             </Text>
-            <Text style={CommunityStyles.groupDetails}>{item.leader}</Text>
+            <Text style={CommunityStyles.groupDetails}>
+              {item.studyGroupInfo.leaderName}
+            </Text>
           </View>
-          {item.userId === tempUserId && (
+          {item.studyGroupInfo.leaderId === tempUserId && (
             <TouchableOpacity onPress={() => console.log('edit clicked!!')}>
               <Ionicons name="pencil" size={24} color="black" />
             </TouchableOpacity>
@@ -314,13 +350,10 @@ const renderTabBar = props => {
         const weight = focused ? {fontWeight: 'bold'} : {};
         return (
           <Text
-            style={[
-              CommunityStyles.label,
-              {
-                color,
-                ...weight,
-              },
-            ]}>
+            style={{
+              color,
+              ...weight,
+            }}>
             {route.title}
           </Text>
         );
@@ -362,25 +395,46 @@ const CommunityHomeScreen = () => {
         transparent={true}
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}>
-        <View style={CommunityStyles.modalContainer}>
-          <View style={CommunityStyles.modalContent}>
-            <View style={CommunityStyles.iconPlaceholder}>
-              {/* 사용자 아이콘 */}
+        <KeyboardAvoidingView style={{flex: 1}}>
+          <ScrollView contentContainerStyle={{flexGrow: 1}}>
+            <View style={CommunityStyles.modalContainer}>
+              <View style={CommunityStyles.modalContent}>
+                <View style={{flexDirection: 'row'}}>
+                  <View style={CommunityStyles.iconPlaceholder}>
+                    <TouchableOpacity
+                      onPress={() => console.log('image touched!!')}>
+                      <Ionicons name="image" size={24} color="#014099" />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{flex: 1}}>
+                    <TextInput
+                      style={CommunityStyles.modalInput}
+                      placeholder="스터디 그룹명을 입력하세요"
+                    />
+                    <TextInput
+                      style={CommunityStyles.modalInput}
+                      placeholder="제한인원"
+                    />
+                  </View>
+                </View>
+                <TextInput
+                  style={[CommunityStyles.modalInput, {height: '50%'}]}
+                  placeholder="스터디 그룹에 대한 소개문을 입력하세요."
+                  textAlignVertical="top"
+                  multiline={true}
+                />
+                <CustomButton
+                  onPress={() => setModalVisible(false)}
+                  text="수정"
+                />
+                <CustomButton
+                  onPress={() => setModalVisible(false)}
+                  text="취소"
+                />
+              </View>
             </View>
-            <Text style={CommunityStyles.modalTitle}>
-              스터디그룹명: 우당탕탕 코린이들
-            </Text>
-            <Text style={CommunityStyles.modalSubtitle}>제한 인원: 3</Text>
-            <Text style={CommunityStyles.modalDescription}>
-              캡스톤 2 강의 준비를 위한 스터디 그룹입니다.
-            </Text>
-            <TouchableOpacity
-              style={CommunityStyles.modalButton}
-              onPress={() => setModalVisible(false)}>
-              <Text style={CommunityStyles.modalButtonText}>수정</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <TouchableOpacity

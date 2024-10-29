@@ -25,17 +25,27 @@ export const SubjectModal = ({
 }) => {
   const [subjectTitle, setSubjectTitle] = useState('');
   useEffect(() => {
-    setSubjectTitle(initialTitle);
-  }, [initialTitle]);
+    console.log('isEdit ' + isEdit);
+    console.log('initial ' + initialTitle);
+    if (visible) {
+      setSubjectTitle(isEdit ? initialTitle : '');
+    }
+  }, [visible, isEdit, initialTitle]);
+
   const onChangeTitle = title => {
     console.log(title);
     setSubjectTitle(title);
   };
   const handleSave = () => {
-    if (subjectTitle === '') {
-      Alert.alert('입력 오류', '입력되지 않는 요소가 있습니다.', [
-        {text: '확인'},
-      ]);
+    if (subjectTitle.trim() === '') {
+      Alert.alert('입력 오류', '과목명을 입력하세요.', [{text: '확인'}]);
+      return;
+    }
+    const isDuplicate = subjectCardInfoList.some(
+      item => item.subjectInfo.title === subjectTitle,
+    );
+    if (isDuplicate) {
+      Alert.alert('중복 오류', '이미 존재하는 과목명입니다.', [{text: '확인'}]);
       return;
     }
     if (isEdit) {
@@ -58,6 +68,10 @@ export const SubjectModal = ({
       console.log(newSubjectInfo);
       setSubjectCardInfoList([...subjectCardInfoList, newSubjectInfo]);
     }
+    exit();
+  };
+  const exit = () => {
+    console.log(subjectCardInfoList);
     setSubjectTitle('');
     onClose();
   };
@@ -73,7 +87,7 @@ export const SubjectModal = ({
             onChangeText={onChangeTitle}
           />
           <View style={styles.modalButtonRow}>
-            <TouchableOpacity style={styles.modalButton} onPress={onClose}>
+            <TouchableOpacity style={styles.modalButton} onPress={exit}>
               <Text style={commonStyles.buttonText}>취소</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
@@ -110,22 +124,41 @@ export const SubjectOptionModal = ({visible, onClose, onEdit, onDelete}) => {
   );
 };
 
-export const SubjectCard = ({navigation, title, time, onPress}) => {
+export const SubjectCard = ({title, time, onPressIcon, onPressCard}) => {
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('Study')}>
+    <TouchableOpacity onPress={onPressCard}>
       <View style={styles.card}>
         <Text style={styles.cardText}>{title}</Text>
         <View style={styles.cardRight}>
           <Text style={styles.cardTime}>{time}</Text>
           <TouchableOpacity
             style={styles.cardIconLeftMargin}
-            onPress={() => onPress(true)}>
+            onPress={onPressIcon}>
             <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
   );
+};
+
+export const formatTime = studySeconds => {
+  const hours = Math.floor(studySeconds / 3600);
+  const minutes = Math.floor((studySeconds % 3600) / 60);
+  const seconds = studySeconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+export const calculateTotalTime = ({subjectCardInfoList}) => {
+  console.log(subjectCardInfoList);
+  const totalSeconds = subjectCardInfoList.reduce((acc, item) => {
+    const [hours, minutes, seconds] = item.subjectInfo.time
+      .split(':')
+      .map(Number);
+    return acc + hours * 3600 + minutes * 60 + seconds;
+  }, 0);
+  return formatTime(totalSeconds);
 };
 
 const styles = StyleSheet.create({
@@ -135,7 +168,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#00aaff',
     padding: width * 0.05,
-    marginVertical: width * 0.05,
+    marginVertical: width * 0.01,
     width: width * 0.9,
     borderRadius: 8,
   },

@@ -15,16 +15,19 @@ import {
   SubjectModal,
   SubjectOptionModal,
   SubjectCard,
+  formatTime,
+  calculateTotalTime,
 } from '../../component/subject';
 
 const {width} = Dimensions.get('window');
 
-const HomeScreen = ({navigation}) => {
-  const [subjectCardInfoList, setSubjectCardInfoList] = useState([]);
-  const [mode, setMode] = useState(null);
-  const [modalOptionVisible, setModalOptionVisible] = useState(false);
-  const [editingKey, setEditingKey] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
+const HomeScreen = ({route, navigation}) => {
+  const [subjectCardInfoList, setSubjectCardInfoList] = useState([]); // 사용자 과목 리스트
+  const [mode, setMode] = useState(null); // 과목 수정 및 추가 모드 결정
+  const [modalOptionVisible, setModalOptionVisible] = useState(false); // 수정 및 추가 모달 렌더링 유무
+  const [editingKey, setEditingKey] = useState(null); // 수정할 과목의 key 정보
+  const [selectedItem, setSelectedItem] = useState(null); // 선택 과목 정보
+  const [totalTime, setTotalTime] = useState('00:00:00');
 
   const handleDelete = key => {
     Alert.alert('삭제', '해당 과목을 삭제하시겠습니까?', [
@@ -44,6 +47,34 @@ const HomeScreen = ({navigation}) => {
     ]);
   };
   useEffect(() => {
+    const updatedSubjectTime = (key, elapsedTime) => {
+      setSubjectCardInfoList(prev =>
+        prev.map(item =>
+          item.key === key
+            ? {
+                ...item,
+                subjectInfo: {
+                  ...item.subjectInfo,
+                  time: addTime(item.subjectInfo.time, elapsedTime),
+                },
+              }
+            : item,
+        ),
+      );
+    };
+    if (route.params?.elapsedTime && route.params?.key) {
+      const {elapsedTime, key} = route.params;
+      updatedSubjectTime(key, elapsedTime);
+    }
+  }, [route.params]);
+  const addTime = (currentTime, elapsedSeconds) => {
+    // 배열 요소 숫자 변환 map(Number)
+    const [hours, minutes, seconds] = currentTime.split(':').map(Number);
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds + elapsedSeconds;
+
+    return formatTime(totalSeconds);
+  };
+  useEffect(() => {
     setSubjectCardInfoList([
       {
         key: 1,
@@ -54,6 +85,9 @@ const HomeScreen = ({navigation}) => {
       },
     ]);
   }, []);
+  useEffect(() => {
+    setTotalTime(calculateTotalTime({subjectCardInfoList}));
+  }, [subjectCardInfoList]);
 
   return (
     <View style={styles.homeContainer}>
@@ -63,7 +97,7 @@ const HomeScreen = ({navigation}) => {
           setMode(null);
           setModalOptionVisible(false);
         }}
-        isEditMode={mode === 'edit'}
+        isEdit={mode === 'edit'}
         initialTitle={selectedItem?.subjectInfo?.title || ''}
         subjectCardInfoList={subjectCardInfoList}
         setSubjectCardInfoList={setSubjectCardInfoList}
@@ -78,7 +112,7 @@ const HomeScreen = ({navigation}) => {
         }}
         onDelete={() => handleDelete(selectedItem.key)}
       />
-      <Text style={styles.timer}>01:59:32</Text>
+      <Text style={styles.timer}>{totalTime}</Text>
 
       {subjectCardInfoList.length === 0 ? null : (
         <ScrollView>
@@ -87,10 +121,15 @@ const HomeScreen = ({navigation}) => {
               <SubjectCard
                 title={item.subjectInfo.title}
                 time={item.subjectInfo.time}
-                navigation={navigation}
-                onPress={() => {
+                onPressIcon={() => {
                   setSelectedItem(item);
                   setModalOptionVisible(true);
+                }}
+                onPressCard={() => {
+                  navigation.navigate('Study', {
+                    key: item.key,
+                    subjectInfo: item.subjectInfo,
+                  });
                 }}
               />
             </View>

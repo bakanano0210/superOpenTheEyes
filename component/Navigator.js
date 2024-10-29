@@ -10,7 +10,12 @@ import StudyScreen from '../screen/studyScreen';
 import AddAllowedAppScreen from '../screen/addAllowedAppScreen';
 import ProfileScreen from '../screen/profileScreen';
 import NotificationScreen from '../screen/notificationScreens/notificationScreen';
-import {HomeLeftHeader, HomeRightHeader, StudyingRightHeader} from './header';
+import {
+  HomeLeftHeader,
+  HomeRightHeader,
+  ProfileRightHeader,
+  StudyingRightHeader,
+} from './header';
 import {CustomMenu} from './custom';
 import {useMainContext} from './mainContext';
 
@@ -78,7 +83,6 @@ export const MainStackNavigator = () => {
           headerStyle: {backgroundColor: '#fdf7ff'},
           headerTintColor: '#000',
           headerTitleStyle: {fontWeight: 'bold'},
-          headerRight: HomeRightHeader,
         }}>
         <Stack.Screen
           name="Tab"
@@ -86,6 +90,7 @@ export const MainStackNavigator = () => {
           options={{
             title: '슈퍼눈떠봐',
             headerLeft: HomeLeftHeader,
+            headerRight: HomeRightHeader,
           }}
         />
         <Stack.Screen
@@ -96,13 +101,12 @@ export const MainStackNavigator = () => {
             headerRight: StudyingRightHeader,
           }}
         />
+        <Stack.Screen name="허용앱" component={AddAllowedAppScreen} />
         <Stack.Screen
-          name="허용앱"
-          component={AddAllowedAppScreen}
-          options={{}}
+          name="프로필"
+          component={ProfileScreen}
+          options={{headerRight: ProfileRightHeader}}
         />
-        <Stack.Screen name="프로필" component={ProfileScreen} />
-        {/* 나중에 프로필에 로그아웃 아이콘 추가할 것*/}
         <Stack.Screen name="알림" component={NotificationScreen} />
       </Stack.Navigator>
       <CustomMenu />

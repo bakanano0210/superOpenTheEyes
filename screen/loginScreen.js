@@ -9,9 +9,14 @@ import {
 } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import {commonStyles} from '../public/styles';
-import {CustomButton, CustomLoginInput} from '../component/custom';
+import {
+  CustomButton,
+  CustomLoginInput,
+  handleNavigate,
+} from '../component/custom';
 
 const {width, height} = Dimensions.get('window');
+
 const LoginScreen = ({navigation}) => {
   return (
     <View style={styles.loginContainer}>
@@ -39,13 +44,11 @@ const LoginScreen = ({navigation}) => {
         </View>
         <View style={styles.buttonView}>
           <CustomButton
-            navigation={navigation}
-            destination="MainApp"
+            onPress={() => handleNavigate({navigation}, 'MainApp')}
             text="로그인"
           />
           <CustomButton
-            navigation={navigation}
-            destination="Registration"
+            onPress={() => handleNavigate({navigation}, 'Registration')}
             text="회원가입"
           />
         </View>
@@ -73,12 +76,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   forgotPassword: {
-    color: '#000000',
+    color: '#000',
   },
   checkboxSize: width * 0.05,
   label: {
     marginLeft: width * 0.02,
-    color: '#000000',
+    color: '#000',
     lineHeight: width * 0.06,
   },
   checkboxIconStyle: {
@@ -98,17 +101,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
   },
-  buttonView: {
-    flex: 3,
-    justifyContent: 'center',
-  },
+  buttonView: {},
   loginButtonStyle: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     alignSelf: 'center',
   },
   loginText: {
-    color: '#000000',
+    color: '#000',
     fontSize: height * 0.015,
   },
 });
