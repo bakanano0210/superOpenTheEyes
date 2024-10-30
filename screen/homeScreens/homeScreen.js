@@ -17,7 +17,7 @@ import {
   SubjectCard,
   formatTime,
   calculateTotalTime,
-} from '../../component/subject';
+} from '../../component/Subject';
 
 const {width} = Dimensions.get('window');
 

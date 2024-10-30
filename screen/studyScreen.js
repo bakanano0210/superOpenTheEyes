@@ -10,7 +10,7 @@ import {
 import {Camera, useCameraDevice} from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {studyingStyles} from '../public/styles';
-import {formatTime} from '../component/subject';
+import {formatTime} from '../component/Subject';
 
 const StudyScreen = ({route, navigation}) => {
   const {key, subjectInfo} = route.params;
@@ -19,6 +19,7 @@ const StudyScreen = ({route, navigation}) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const intervalRef = useRef(null); // 타이머 취소용
 
+  useEffect(() => {}, []);
   useEffect(() => {
     const requestCameraPermission = async () => {
       try {
