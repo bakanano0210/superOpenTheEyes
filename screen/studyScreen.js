@@ -19,6 +19,7 @@ const StudyScreen = ({route, navigation}) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const intervalRef = useRef(null); // 타이머 취소용
 
+  useEffect(() => {}, []);
   useEffect(() => {
     const requestCameraPermission = async () => {
       try {

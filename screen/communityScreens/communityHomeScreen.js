@@ -369,7 +369,6 @@ const CommunityHomeScreen = () => {
 
   const [index, setIndex] = useState(initialIndex);
   const [modalVisible, setModalVisible] = useState(false);
-  console.log(index);
   useEffect(() => {
     console.log(initialIndex);
     setIndex(initialIndex);
@@ -389,6 +388,7 @@ const CommunityHomeScreen = () => {
         initialLayout={{width: layout.width}}
         renderTabBar={renderTabBar}
         style={{flex: 10}}
+        lazy={true}
       />
       <Modal
         visible={modalVisible}
