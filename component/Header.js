@@ -1,5 +1,11 @@
 import React from 'react';
-import {TouchableOpacity, Text, StyleSheet, Dimensions} from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Dimensions,
+  View,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {useMainContext} from './mainContext';
@@ -13,6 +19,9 @@ export const HomeLeftHeader = () => {
       <Ionicons name="menu" size={24} color="#000" />
     </TouchableOpacity>
   );
+};
+export const EmptyLeftHeader = () => {
+  return <View />;
 };
 
 export const HomeRightHeader = () => {
@@ -56,6 +65,18 @@ export const ProfileRightHeader = () => {
     <TouchableOpacity onPress={() => console.log('로그아웃 pressed!')}>
       <Ionicons
         name="log-out-outline"
+        size={24}
+        color="#000"
+        style={styles.icon}
+      />
+    </TouchableOpacity>
+  );
+};
+export const CommunityOwnerRightHeader = () => {
+  return (
+    <TouchableOpacity onPress={() => {}}>
+      <Ionicons
+        name="ellipsis-vertical"
         size={24}
         color="#000"
         style={styles.icon}

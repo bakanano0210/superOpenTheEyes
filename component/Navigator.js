@@ -10,7 +10,9 @@ import StudyScreen from '../screen/studyScreen';
 import AddAllowedAppScreen from '../screen/addAllowedAppScreen';
 import ProfileScreen from '../screen/profileScreen';
 import NotificationScreen from '../screen/notificationScreens/notificationScreen';
+import HelpRequestViewScreen from '../screen/communityScreens/helpRequestViewScreen';
 import {
+  EmptyLeftHeader,
   HomeLeftHeader,
   HomeRightHeader,
   ProfileRightHeader,
@@ -18,6 +20,9 @@ import {
 } from './header';
 import {CustomMenu} from './custom';
 import {useMainContext} from './mainContext';
+import StudyGroupDetailScreen from '../screen/communityScreens/studyGroupDetailScreen';
+import HelpRequestPostScreen from '../screen/communityScreens/helpRequestPostScreen';
+import QuizPostScreen from '../screen/communityScreens/quizPostScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -30,7 +35,13 @@ const icons = {
 const TabBarIcon = ({name, color, size}) => {
   return <Ionicons name={name} size={size} color={color} />;
 };
-
+const defaultScreenOptions = {
+  headerShown: true,
+  headerTitleAlign: 'center',
+  headerStyle: {backgroundColor: '#fdf7ff'},
+  headerTintColor: '#000',
+  headerTitleStyle: {fontWeight: 'bold'},
+};
 const getScreenOptions = route => ({
   headerShown: false,
   tabBarShowLabel: false,
@@ -56,7 +67,7 @@ export const BottomTabNavigator = () => {
     <Tab.Navigator screenOptions={({route}) => getScreenOptions(route)}>
       <Tab.Screen
         name="HomeStack"
-        component={HomeScreen}
+        component={HomeStackNavigator}
         listeners={{tabPress: tabEvent}}
       />
       <Tab.Screen
@@ -66,7 +77,7 @@ export const BottomTabNavigator = () => {
       />
       <Tab.Screen
         name="Ranking"
-        component={RankingScreen}
+        component={RankingStackNavigator}
         listeners={{tabPress: tabEvent}}
       />
     </Tab.Navigator>
@@ -78,7 +89,6 @@ export const MainStackNavigator = () => {
     <>
       <Stack.Navigator
         screenOptions={{
-          headerShown: true,
           headerTitleAlign: 'center',
           headerStyle: {backgroundColor: '#fdf7ff'},
           headerTintColor: '#000',
@@ -87,11 +97,7 @@ export const MainStackNavigator = () => {
         <Stack.Screen
           name="Tab"
           component={BottomTabNavigator}
-          options={{
-            title: '슈퍼눈떠봐',
-            headerLeft: HomeLeftHeader,
-            headerRight: HomeRightHeader,
-          }}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="Study"
@@ -99,6 +105,7 @@ export const MainStackNavigator = () => {
           options={{
             title: '학습 중',
             headerRight: StudyingRightHeader,
+            headerLeft: EmptyLeftHeader,
           }}
         />
         <Stack.Screen name="허용앱" component={AddAllowedAppScreen} />
@@ -116,11 +123,68 @@ export const MainStackNavigator = () => {
 
 const CommunityStackNavigator = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={defaultScreenOptions}>
       <Stack.Screen
         name="CommunityHome"
         component={CommunityHomeScreen}
-        options={{headerShown: false}}
+        options={{
+          title: '커뮤니티',
+          headerLeft: HomeLeftHeader,
+          headerRight: HomeRightHeader,
+        }}
+      />
+      <Stack.Screen
+        name="StudyGroupDetail"
+        component={StudyGroupDetailScreen}
+        options={{
+          headerRight: HomeRightHeader,
+        }}
+      />
+      <Stack.Screen
+        name="HelpRequestView"
+        component={HelpRequestViewScreen}
+        options={{title: '게시글'}}
+      />
+      <Stack.Screen
+        name="HelpRequestPost"
+        component={HelpRequestPostScreen}
+        options={{title: '게시글'}}
+      />
+      <Stack.Screen
+        name="QuizPost"
+        component={QuizPostScreen}
+        options={{title: '퀴즈'}}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const HomeStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={defaultScreenOptions}>
+      <Stack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{
+          title: '슈퍼눈떠봐',
+          headerLeft: HomeLeftHeader,
+          headerRight: HomeRightHeader,
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+const RankingStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={defaultScreenOptions}>
+      <Stack.Screen
+        name="RankingScreen"
+        component={RankingScreen}
+        options={{
+          title: '슈퍼눈떠봐',
+          headerLeft: HomeLeftHeader,
+          headerRight: HomeRightHeader,
+        }}
       />
     </Stack.Navigator>
   );

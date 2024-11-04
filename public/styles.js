@@ -182,34 +182,3 @@ export const CommunityStyles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export const studyingStyles = StyleSheet.create({
-  studyingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  cameraStyle: {
-    flex: 1,
-  },
-  cameraWidth: width * 0.9,
-  cameraHeight: height * 0.9,
-  cameraPlaceholder: {
-    width: width * 0.9,
-    height: width * 0.9,
-    backgroundColor: '#000',
-    marginBottom: 20,
-  },
-  subjectName: {
-    fontSize: width * 0.06,
-    color: '#000',
-  },
-  timer: {
-    fontSize: width * 0.15,
-    fontWeight: 'bold',
-    color: '#014099',
-    marginBottom: 10,
-  },
-  iconSize: width * 0.3,
-  // 집중 화면 스타일
-});
