@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {formatTime} from '../../component/Subject';
+import {formatTime} from '../../component/subject';
 const {width} = Dimensions.get('window');
 
 const calculateTotalTime = ({members}) => {
@@ -54,7 +54,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
             {item.studyGroupInfo.description}
           </Text>
           <Text style={styles.groupDetail}>
-            총인원 : {item.studyGroupInfo.members}
+            총인원 : {item.studyGroupInfo.members}/{item.studyGroupInfo.limit}
           </Text>
           <Text style={styles.groupDetail}>스터디 그룹 랭킹 2위</Text>
         </View>
@@ -113,7 +113,9 @@ const styles = StyleSheet.create({
   },
   groupDescription: {
     fontSize: 16,
-    marginBottom: 5,
+    marginBottom: 15,
+    paddingBottom: 5,
+    lineHeight: 20, // 줄 간격 설정
   },
   groupDetail: {
     fontSize: 14,

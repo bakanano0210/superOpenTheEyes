@@ -6,6 +6,30 @@ const MainContext = createContext();
 
 export const MainProvider = ({children}) => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [studyGroups, setStudyGroups] = useState([
+    {
+      id: '1',
+      studyGroupInfo: {
+        leaderId: '1',
+        name: '감자머리 신짱구',
+        members: 38,
+        leaderName: '그룹장',
+        description: '임시',
+        limit: 50,
+      },
+    },
+    {
+      id: '2',
+      studyGroupInfo: {
+        leaderId: 'user123',
+        name: '우당탕탕 코린이들',
+        members: 3,
+        leaderName: 'HDH',
+        description: '캡스톤 2 강의 준비를 위한 스터디 그룹입니다.',
+        limit: 3,
+      },
+    },
+  ]);
   const [helpRequests, setHelpRequests] = useState([
     {
       id: '1',
@@ -128,6 +152,8 @@ export const MainProvider = ({children}) => {
         setComments,
         quizzes,
         setQuizzes,
+        studyGroups,
+        setStudyGroups,
       }}>
       {children}
     </MainContext.Provider>

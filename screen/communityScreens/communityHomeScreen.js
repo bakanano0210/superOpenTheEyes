@@ -49,8 +49,8 @@ const QuizTap = () => {
               quizInfo: {
                 ...quiz.quizInfo,
                 dislikes: quiz.quizInfo.userDisliked
-                  ? quiz.quizInfo.dislikes + 1
-                  : quiz.quizInfo.dislikes - 1,
+                  ? quiz.quizInfo.dislikes - 1
+                  : quiz.quizInfo.dislikes + 1,
                 userDisliked: !quiz.quizInfo.userDisliked,
               },
             }

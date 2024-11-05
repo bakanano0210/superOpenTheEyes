@@ -42,7 +42,7 @@ export const SubjectModal = ({
       return;
     }
     const isDuplicate = subjectCardInfoList.some(
-      item => item.subjectInfo.title === subjectTitle,
+      item => item.title === subjectTitle,
     );
     if (isDuplicate) {
       Alert.alert('중복 오류', '이미 존재하는 과목명입니다.', [{text: '확인'}]);
@@ -50,9 +50,7 @@ export const SubjectModal = ({
     }
     if (isEdit) {
       const updatedList = subjectCardInfoList.map(item =>
-        item.key === editingKey
-          ? {...item, subjectInfo: {...item.subjectInfo, title: subjectTitle}}
-          : item,
+        item.key === editingKey ? {...item, title: subjectTitle} : item,
       );
       setSubjectCardInfoList(updatedList);
     } else {
@@ -60,10 +58,8 @@ export const SubjectModal = ({
       const key = `${subjectTitle}_${currentTime}`;
       const newSubjectInfo = {
         key: key,
-        subjectInfo: {
-          title: subjectTitle,
-          time: '00:00:00',
-        },
+        title: subjectTitle,
+        time: '00:00:00',
       };
       console.log(newSubjectInfo);
       setSubjectCardInfoList([...subjectCardInfoList, newSubjectInfo]);
@@ -128,7 +124,9 @@ export const SubjectCard = ({title, time, onPressIcon, onPressCard}) => {
   return (
     <TouchableOpacity onPress={onPressCard}>
       <View style={styles.card}>
-        <Text style={styles.cardText}>{title}</Text>
+        <View style={styles.cardTitleContainer}>
+          <Text style={styles.cardText}>{title}</Text>
+        </View>
         <View style={styles.cardRight}>
           <Text style={styles.cardTime}>{time}</Text>
           <TouchableOpacity
@@ -153,9 +151,7 @@ export const formatTime = studySeconds => {
 export const calculateTotalTime = ({subjectCardInfoList}) => {
   console.log(subjectCardInfoList);
   const totalSeconds = subjectCardInfoList.reduce((acc, item) => {
-    const [hours, minutes, seconds] = item.subjectInfo.time
-      .split(':')
-      .map(Number);
+    const [hours, minutes, seconds] = item.time.split(':').map(Number);
     return acc + hours * 3600 + minutes * 60 + seconds;
   }, 0);
   return formatTime(totalSeconds);
@@ -163,6 +159,7 @@ export const calculateTotalTime = ({subjectCardInfoList}) => {
 
 const styles = StyleSheet.create({
   card: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -172,6 +169,10 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     borderRadius: 8,
   },
+  cardTitleContainer: {
+    flex: 1, // title이 차지할 공간 확보
+    marginRight: 10, // time과 간격 추가
+  },
   cardText: {
     fontSize: width * 0.06,
     color: '#fff',
@@ -179,10 +180,15 @@ const styles = StyleSheet.create({
   cardTime: {
     fontSize: width * 0.06,
     color: '#fff',
+    flexShrink: 1, // 줄어들 수 있도록 설정
+    flexWrap: 'wrap', // 줄 바꿈 허용
+    maxWidth: '70%', // title의 최대 너비 설정
   },
   cardRight: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1, // 남은 공간 확보
+    justifyContent: 'flex-end', // 오른쪽 정렬
   },
   cardIconLeftMargin: {
     marginLeft: width * 0.05,

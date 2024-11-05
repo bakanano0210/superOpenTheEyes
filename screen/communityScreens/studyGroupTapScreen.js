@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {CustomButton} from '../../component/custom';
+import {useMainContext} from '../../component/mainContext';
 
 const {width, height} = Dimensions.get('window');
 const tempUserId = 'user123';
@@ -26,29 +27,7 @@ const StudyGroupTap = ({
   setIsEditMode,
   navigation,
 }) => {
-  const [studyGroups, setStudyGroups] = useState([
-    {
-      id: '1',
-      studyGroupInfo: {
-        leaderId: '1',
-        name: '감자머리 신짱구',
-        members: '38/50',
-        leaderName: '그룹장',
-        description: '임시',
-      },
-    },
-    {
-      id: '2',
-      studyGroupInfo: {
-        leaderId: 'user123',
-        name: '우당탕탕 코린이들',
-        members: '3/3',
-        leaderName: 'HDH',
-        description: '캡스톤 2 강의 준비를 위한 스터디 그룹입니다.',
-      },
-    },
-  ]);
-
+  const {studyGroups, setStudyGroups} = useMainContext();
   const [selectedGroup, setSelectedGroup] = useState({
     id: '',
     studyGroupInfo: {
@@ -60,7 +39,7 @@ const StudyGroupTap = ({
   });
 
   const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupLimit, setNewGroupLimit] = useState('');
+  const [newGroupLimit, setNewGroupLimit] = useState(1);
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const leaderName = '로그인아이디';
 
@@ -83,9 +62,18 @@ const StudyGroupTap = ({
     if (isEditMode) {
       const updatedGroups = studyGroups.map(group =>
         group.id === selectedGroup.id
-          ? {...selectedGroup, ...group.studyGroupInfo}
+          ? {
+              ...selectedGroup,
+              studyGroupInfo: {
+                ...group.studyGroupInfo,
+                name: newGroupName,
+                description: newGroupDescription,
+                limit: newGroupLimit,
+              },
+            }
           : group,
       );
+      console.log(updatedGroups);
       setStudyGroups(updatedGroups);
     } else {
       const currentTime = Date.now().toString();
@@ -95,9 +83,10 @@ const StudyGroupTap = ({
         studyGroupInfo: {
           leaderId: tempUserId,
           name: newGroupName,
-          members: `1/${newGroupLimit}`,
+          members: 1,
           leaderName: leaderName,
           description: newGroupDescription,
+          limit: newGroupLimit,
         },
       };
       setStudyGroups([newGroup, ...studyGroups]);
@@ -107,7 +96,7 @@ const StudyGroupTap = ({
 
   const handleCancle = () => {
     setNewGroupName('');
-    setNewGroupLimit('');
+    setNewGroupLimit(1);
     setNewGroupDescription();
     setModalVisible(false);
     setIsEditMode(false);
@@ -136,7 +125,7 @@ const StudyGroupTap = ({
           <View style={styles.groupDetailsContainer}>
             <View>
               <Text style={styles.groupDetails}>
-                {item.studyGroupInfo.members}
+                {item.studyGroupInfo.members}/{item.studyGroupInfo.limit}
               </Text>
               <Text style={styles.groupDetails}>
                 {item.studyGroupInfo.leaderName}
@@ -149,7 +138,7 @@ const StudyGroupTap = ({
                   setModalVisible(true);
                   setSelectedGroup(item);
                   setNewGroupName(item.studyGroupInfo.name);
-                  setNewGroupLimit(item.studyGroupInfo.members);
+                  setNewGroupLimit(item.studyGroupInfo.limit);
                   setNewGroupDescription(item.studyGroupInfo.description);
                 }}>
                 <Ionicons name="pencil" size={24} color="black" />
@@ -160,7 +149,8 @@ const StudyGroupTap = ({
       </View>
     </TouchableOpacity>
   );
-
+  console.log('newlImit');
+  console.log(newGroupLimit);
   return (
     <View style={styles.communityContainer}>
       <Modal
@@ -189,8 +179,8 @@ const StudyGroupTap = ({
                     <TextInput
                       style={styles.modalInput}
                       placeholder="제한인원"
-                      value={newGroupLimit}
-                      onChangeText={setNewGroupLimit}
+                      value={newGroupLimit.toString()}
+                      onChangeText={text => setNewGroupLimit(Number(text))}
                     />
                   </View>
                 </View>

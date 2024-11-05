@@ -17,7 +17,7 @@ import {
   SubjectCard,
   formatTime,
   calculateTotalTime,
-} from '../../component/Subject';
+} from '../../component/subject';
 
 const {width} = Dimensions.get('window');
 
@@ -53,10 +53,7 @@ const HomeScreen = ({route, navigation}) => {
           item.key === key
             ? {
                 ...item,
-                subjectInfo: {
-                  ...item.subjectInfo,
-                  time: addTime(item.subjectInfo.time, elapsedTime),
-                },
+                time: addTime(item.time, elapsedTime),
               }
             : item,
         ),
@@ -78,10 +75,8 @@ const HomeScreen = ({route, navigation}) => {
     setSubjectCardInfoList([
       {
         key: 1,
-        subjectInfo: {
-          title: '캡스톤 2',
-          time: '01:59:32',
-        },
+        title: '캡스톤 2',
+        time: '01:59:32',
       },
     ]);
   }, []);
@@ -98,7 +93,7 @@ const HomeScreen = ({route, navigation}) => {
           setModalOptionVisible(false);
         }}
         isEdit={mode === 'edit'}
-        initialTitle={selectedItem?.subjectInfo?.title || ''}
+        initialTitle={selectedItem?.title || ''}
         subjectCardInfoList={subjectCardInfoList}
         setSubjectCardInfoList={setSubjectCardInfoList}
         editingKey={editingKey}
@@ -113,22 +108,20 @@ const HomeScreen = ({route, navigation}) => {
         onDelete={() => handleDelete(selectedItem.key)}
       />
       <Text style={styles.timer}>{totalTime}</Text>
-
       {subjectCardInfoList.length === 0 ? null : (
         <ScrollView>
           {subjectCardInfoList.map(item => (
             <View key={item.key}>
               <SubjectCard
-                title={item.subjectInfo.title}
-                time={item.subjectInfo.time}
+                title={item.title}
+                time={item.time}
                 onPressIcon={() => {
                   setSelectedItem(item);
                   setModalOptionVisible(true);
                 }}
                 onPressCard={() => {
                   navigation.navigate('Study', {
-                    key: item.key,
-                    subjectInfo: item.subjectInfo,
+                    subject: item,
                   });
                 }}
               />
