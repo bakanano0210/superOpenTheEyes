@@ -16,6 +16,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {CustomButton} from '../../component/custom';
 import {useMainContext} from '../../component/mainContext';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const {width, height} = Dimensions.get('window');
 const tempUserId = 'user123';
@@ -40,7 +41,27 @@ const StudyGroupTap = ({
   const [newGroupLimit, setNewGroupLimit] = useState(1);
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const leaderName = '로그인아이디';
+  const [imageUri, setImageUri] = useState('');
 
+  const handleChoosePhoto = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 200,
+        maxWidth: 200,
+      },
+      response => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorMessage) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          setImageUri(response.assets[0].uri);
+        }
+      },
+    );
+  };
   const handleDelete = id => {
     Alert.alert('삭제 확인', '이 항목을 삭제하시겠습니까?', [
       {text: '취소', style: 'cancel'},
@@ -65,6 +86,7 @@ const StudyGroupTap = ({
               name: newGroupName,
               description: newGroupDescription,
               limit: newGroupLimit,
+              imageUri: imageUri,
             }
           : group,
       );
@@ -81,6 +103,7 @@ const StudyGroupTap = ({
         leaderName: leaderName,
         description: newGroupDescription,
         limit: newGroupLimit,
+        imageUri: imageUri,
       };
       setStudyGroups([newGroup, ...studyGroups]);
     }
@@ -93,6 +116,7 @@ const StudyGroupTap = ({
     setNewGroupDescription();
     setModalVisible(false);
     setIsEditMode(false);
+    setImageUri('');
   };
 
   const renderItem = ({item}) => (
@@ -101,7 +125,11 @@ const StudyGroupTap = ({
       <View style={styles.groupContainer}>
         <View style={styles.iconPlaceholder}>
           <Image
-            source={require('../../assets/exampleImg.png')}
+            source={
+              item.imageUri === ''
+                ? require('../../assets/exampleImg.png')
+                : {uri: item.imageUri}
+            }
             resizeMode="contain"
             style={styles.groupIcon}
           />
@@ -131,6 +159,7 @@ const StudyGroupTap = ({
                   setNewGroupName(item.name);
                   setNewGroupLimit(item.limit);
                   setNewGroupDescription(item.description);
+                  setImageUri(item.imageUri);
                 }}>
                 <Ionicons name="pencil" size={24} color="black" />
               </TouchableOpacity>
@@ -140,8 +169,6 @@ const StudyGroupTap = ({
       </View>
     </TouchableOpacity>
   );
-  console.log('newlImit');
-  console.log(newGroupLimit);
   return (
     <View style={styles.communityContainer}>
       <Modal
@@ -155,9 +182,16 @@ const StudyGroupTap = ({
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <View style={styles.iconPlaceholder}>
-                    <TouchableOpacity
-                      onPress={() => console.log('image touched!!')}>
-                      <Ionicons name="image" size={24} color="#014099" />
+                    <TouchableOpacity onPress={handleChoosePhoto}>
+                      {imageUri === '' ? (
+                        <Ionicons name="image" size={24} color="#014099" />
+                      ) : (
+                        <Image
+                          source={{uri: imageUri}}
+                          resizeMode="contain"
+                          style={{width: 32, height: 32}}
+                        />
+                      )}
                     </TouchableOpacity>
                   </View>
                   <View style={styles.inputContainer}>
@@ -277,8 +311,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   groupIcon: {
-    width: 48,
-    height: 48,
+    width: 64,
+    height: 64,
   },
   groupInfo: {
     flex: 1,

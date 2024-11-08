@@ -15,6 +15,7 @@ export const MainProvider = ({children}) => {
       leaderName: '그룹장',
       description: '임시',
       limit: 5,
+      imageUri: '',
     },
     {
       id: '2',
@@ -24,6 +25,7 @@ export const MainProvider = ({children}) => {
       leaderName: 'HDH',
       description: '캡스톤 2 강의 준비를 위한 스터디 그룹입니다.',
       limit: 3,
+      imageUri: '',
     },
   ]);
   const [helpRequests, setHelpRequests] = useState([
@@ -34,6 +36,7 @@ export const MainProvider = ({children}) => {
       date: '2024.10.28 15:55:34',
       user: 'User1',
       comments: 2,
+      uri: [],
     },
     {
       id: '2',
@@ -42,6 +45,7 @@ export const MainProvider = ({children}) => {
       date: '2024.10.25 12:31:32',
       user: 'User2',
       comments: 1,
+      uri: [],
     },
     {
       id: '3',
@@ -50,6 +54,7 @@ export const MainProvider = ({children}) => {
       date: '2024.10.24 05:25:01',
       user: 'User3',
       comments: 10,
+      uri: [],
     },
   ]);
   const [comments, setComments] = useState([
