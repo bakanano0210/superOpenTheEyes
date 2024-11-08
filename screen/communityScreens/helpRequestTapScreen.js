@@ -58,10 +58,8 @@ const HelpRequestTap = ({navigation}) => {
             alignItems: 'center',
           }}>
           <View>
-            <Text style={{fontWeight: 'bold'}}>
-              {item.helpRequestInfo.title}
-            </Text>
-            <Text>{item.helpRequestInfo.description}</Text>
+            <Text style={{fontWeight: 'bold'}}>{item.title}</Text>
+            <Text>{item.description}</Text>
           </View>
           <View
             style={{
@@ -83,7 +81,7 @@ const HelpRequestTap = ({navigation}) => {
                 lineHeight: 18,
                 fontSize: 12,
               }}>
-              {item.helpRequestInfo.comments}
+              {item.comments}
             </Text>
           </View>
         </View>
@@ -93,8 +91,8 @@ const HelpRequestTap = ({navigation}) => {
             justifyContent: 'space-between',
             marginTop: 5,
           }}>
-          <Text style={{color: '#888'}}>{item.helpRequestInfo.date}</Text>
-          <Text style={{color: '#888'}}>{item.helpRequestInfo.user}</Text>
+          <Text style={{color: '#888'}}>{item.date}</Text>
+          <Text style={{color: '#888'}}>{item.user}</Text>
         </View>
       </View>
     </TouchableOpacity>

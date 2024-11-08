@@ -139,7 +139,15 @@ export const SubjectCard = ({title, time, onPressIcon, onPressCard}) => {
     </TouchableOpacity>
   );
 };
-
+export const timeToSeconds = time => {
+  const [hours, minutes, seconds] = time.split(':').map(Number);
+  return hours * 3600 + minutes * 60 + seconds;
+};
+export const addTime = (currentTime, elapsedSeconds) => {
+  // 배열 요소 숫자 변환 map(Number)
+  const totalSeconds = timeToSeconds(currentTime) + elapsedSeconds;
+  return formatTime(totalSeconds);
+};
 export const formatTime = studySeconds => {
   const hours = Math.floor(studySeconds / 3600);
   const minutes = Math.floor((studySeconds % 3600) / 60);

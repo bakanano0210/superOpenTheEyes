@@ -116,7 +116,11 @@ android {
         }
 
     }
-    
+    // externalNativeBuild {
+    //     cmake {
+    //         path "CMakeLists.txt" // CMakeLists.txt 파일의 경로 지정
+    //     }
+    // }
 }
 
 dependencies {

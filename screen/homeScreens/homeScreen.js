@@ -15,13 +15,15 @@ import {
   SubjectModal,
   SubjectOptionModal,
   SubjectCard,
-  formatTime,
+  addTime,
   calculateTotalTime,
 } from '../../component/subject';
+import {useMainContext} from '../../component/mainContext';
 
 const {width} = Dimensions.get('window');
 
 const HomeScreen = ({route, navigation}) => {
+  const {user, setUser} = useMainContext();
   const [subjectCardInfoList, setSubjectCardInfoList] = useState([]); // 사용자 과목 리스트
   const [mode, setMode] = useState(null); // 과목 수정 및 추가 모드 결정
   const [modalOptionVisible, setModalOptionVisible] = useState(false); // 수정 및 추가 모달 렌더링 유무
@@ -64,13 +66,7 @@ const HomeScreen = ({route, navigation}) => {
       updatedSubjectTime(key, elapsedTime);
     }
   }, [route.params]);
-  const addTime = (currentTime, elapsedSeconds) => {
-    // 배열 요소 숫자 변환 map(Number)
-    const [hours, minutes, seconds] = currentTime.split(':').map(Number);
-    const totalSeconds = hours * 3600 + minutes * 60 + seconds + elapsedSeconds;
 
-    return formatTime(totalSeconds);
-  };
   useEffect(() => {
     setSubjectCardInfoList([
       {
@@ -81,9 +77,15 @@ const HomeScreen = ({route, navigation}) => {
     ]);
   }, []);
   useEffect(() => {
-    setTotalTime(calculateTotalTime({subjectCardInfoList}));
-  }, [subjectCardInfoList]);
-
+    const newTotalTime = calculateTotalTime({subjectCardInfoList});
+    setTotalTime(newTotalTime);
+    // totalTime이 변경될 때마다 user의 studyTime을 업데이트
+    setUser(prevUser => ({
+      ...prevUser,
+      studyTime: newTotalTime,
+    }));
+  }, [subjectCardInfoList, setUser]);
+  console.log(user);
   return (
     <View style={styles.homeContainer}>
       <SubjectModal

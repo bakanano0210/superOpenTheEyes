@@ -30,12 +30,10 @@ const StudyGroupTap = ({
   const {studyGroups, setStudyGroups} = useMainContext();
   const [selectedGroup, setSelectedGroup] = useState({
     id: '',
-    studyGroupInfo: {
-      leaderId: '',
-      name: '',
-      members: '',
-      leaderName: '',
-    },
+    leaderId: '',
+    name: '',
+    members: '',
+    leaderName: '',
   });
 
   const [newGroupName, setNewGroupName] = useState('');
@@ -64,12 +62,9 @@ const StudyGroupTap = ({
         group.id === selectedGroup.id
           ? {
               ...selectedGroup,
-              studyGroupInfo: {
-                ...group.studyGroupInfo,
-                name: newGroupName,
-                description: newGroupDescription,
-                limit: newGroupLimit,
-              },
+              name: newGroupName,
+              description: newGroupDescription,
+              limit: newGroupLimit,
             }
           : group,
       );
@@ -80,14 +75,12 @@ const StudyGroupTap = ({
       const newGroupId = `${leaderName}-${currentTime}`;
       const newGroup = {
         id: newGroupId,
-        studyGroupInfo: {
-          leaderId: tempUserId,
-          name: newGroupName,
-          members: 1,
-          leaderName: leaderName,
-          description: newGroupDescription,
-          limit: newGroupLimit,
-        },
+        leaderId: tempUserId,
+        name: newGroupName,
+        members: 1,
+        leaderName: leaderName,
+        description: newGroupDescription,
+        limit: newGroupLimit,
       };
       setStudyGroups([newGroup, ...studyGroups]);
     }
@@ -115,8 +108,8 @@ const StudyGroupTap = ({
         </View>
         <View style={styles.groupInfo}>
           <View style={styles.groupHeader}>
-            <Text style={styles.groupName}>{item.studyGroupInfo.name}</Text>
-            {item.studyGroupInfo.leaderId === tempUserId && (
+            <Text style={styles.groupName}>{item.name}</Text>
+            {item.leaderId === tempUserId && (
               <TouchableOpacity onPress={() => handleDelete(item.id)}>
                 <Ionicons name="close" size={24} color="black" />
               </TouchableOpacity>
@@ -125,21 +118,19 @@ const StudyGroupTap = ({
           <View style={styles.groupDetailsContainer}>
             <View>
               <Text style={styles.groupDetails}>
-                {item.studyGroupInfo.members}/{item.studyGroupInfo.limit}
+                {item.members}/{item.limit}
               </Text>
-              <Text style={styles.groupDetails}>
-                {item.studyGroupInfo.leaderName}
-              </Text>
+              <Text style={styles.groupDetails}>{item.leaderName}</Text>
             </View>
-            {item.studyGroupInfo.leaderId === tempUserId && (
+            {item.leaderId === tempUserId && (
               <TouchableOpacity
                 onPress={() => {
                   setIsEditMode(true);
                   setModalVisible(true);
                   setSelectedGroup(item);
-                  setNewGroupName(item.studyGroupInfo.name);
-                  setNewGroupLimit(item.studyGroupInfo.limit);
-                  setNewGroupDescription(item.studyGroupInfo.description);
+                  setNewGroupName(item.name);
+                  setNewGroupLimit(item.limit);
+                  setNewGroupDescription(item.description);
                 }}>
                 <Ionicons name="pencil" size={24} color="black" />
               </TouchableOpacity>

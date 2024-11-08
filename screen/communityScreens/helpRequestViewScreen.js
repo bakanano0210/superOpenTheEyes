@@ -30,11 +30,9 @@ const HelpRequestViewScreen = ({navigation}) => {
       const newCommentObj = {
         id: Date.now().toString(), // 고유 ID 생성
         postId: post.id,
-        commentInfo: {
-          user: 'CurrentUser', // 현재 로그인된 User로 변경 예정
-          content: newComment,
-          date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        },
+        user: 'CurrentUser', // 현재 로그인된 User로 변경 예정
+        content: newComment,
+        date: new Date().toISOString().slice(0, 19).replace('T', ' '),
       };
 
       // 새로운 댓글 추가 및 상태 업데이트
@@ -47,10 +45,7 @@ const HelpRequestViewScreen = ({navigation}) => {
           item.id === post.id
             ? {
                 ...item,
-                helpRequestInfo: {
-                  ...item.helpRequestInfo,
-                  comments: item.helpRequestInfo.comments + 1,
-                },
+                comments: item.comments + 1,
               }
             : item,
         );
@@ -63,9 +58,9 @@ const HelpRequestViewScreen = ({navigation}) => {
 
   const renderComment = ({item}) => (
     <View style={styles.commentContainer}>
-      <Text style={styles.commentUser}>{item.commentInfo.user}</Text>
-      <Text style={styles.commentContent}>{item.commentInfo.content}</Text>
-      <Text style={styles.commentDate}>{item.commentInfo.date}</Text>
+      <Text style={styles.commentUser}>{item.user}</Text>
+      <Text style={styles.commentContent}>{item.content}</Text>
+      <Text style={styles.commentDate}>{item.date}</Text>
     </View>
   );
 
@@ -73,12 +68,10 @@ const HelpRequestViewScreen = ({navigation}) => {
     <KeyboardAvoidingView style={styles.container}>
       {/* 게시글 정보 */}
       <View style={styles.postContainer}>
-        <Text style={styles.postTitle}>{post.helpRequestInfo.title}</Text>
-        <Text style={styles.postUser}>{post.helpRequestInfo.user}</Text>
-        <Text style={styles.postDate}>{post.helpRequestInfo.date}</Text>
-        <Text style={styles.postContent}>
-          {post.helpRequestInfo.description}
-        </Text>
+        <Text style={styles.postTitle}>{post.title}</Text>
+        <Text style={styles.postUser}>{post.user}</Text>
+        <Text style={styles.postDate}>{post.date}</Text>
+        <Text style={styles.postContent}>{post.description}</Text>
         <Image
           source={require('../../assets/exampleImg.png')}
           style={styles.postImage}

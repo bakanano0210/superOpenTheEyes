@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
+import {TabBar} from 'react-native-tab-view';
 import {useMainContext} from './mainContext';
 
 const {width} = Dimensions.get('window');
@@ -82,6 +83,33 @@ export const CommunityOwnerRightHeader = () => {
         style={styles.icon}
       />
     </TouchableOpacity>
+  );
+};
+export const customRenderTabBar = props => {
+  const {key, ...rest} = props;
+  return (
+    <TabBar
+      {...rest}
+      style={{backgroundColor: '#fdf7ff'}}
+      indicatorStyle={{
+        backgroundColor: '#2196F3',
+        height: 2,
+      }}
+      activeColor={'#2196F3'} // 활성화된 탭 색상
+      inactiveColor={'#666'} // 비활성화된 탭 색상
+      renderLabel={({route, focused, color}) => {
+        const weight = focused ? {fontWeight: 'bold'} : {};
+        return (
+          <Text
+            style={{
+              color,
+              ...weight,
+            }}>
+            {route.title}
+          </Text>
+        );
+      }}
+    />
   );
 };
 

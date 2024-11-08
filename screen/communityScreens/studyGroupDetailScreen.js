@@ -40,7 +40,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
   const {item} = route.params;
   useEffect(() => {
     navigation.setOptions({
-      title: item.studyGroupInfo.name,
+      title: item.name,
     });
   }, [navigation, item]);
   useEffect(() => {
@@ -50,11 +50,9 @@ const StudyGroupDetailScreen = ({navigation}) => {
     <View style={styles.container}>
       <View>
         <View style={styles.groupInfo}>
-          <Text style={styles.groupDescription}>
-            {item.studyGroupInfo.description}
-          </Text>
+          <Text style={styles.groupDescription}>{item.description}</Text>
           <Text style={styles.groupDetail}>
-            총인원 : {item.studyGroupInfo.members}/{item.studyGroupInfo.limit}
+            총인원 : {item.members}/{item.limit}
           </Text>
           <Text style={styles.groupDetail}>스터디 그룹 랭킹 2위</Text>
         </View>

@@ -26,13 +26,11 @@ const HelpRequestPostScreen = ({route}) => {
     }
     const newPost = {
       id: Date.now().toString(), //나중에 userID 와 결합
-      helpRequestInfo: {
-        title,
-        description,
-        date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        user: 'User1', // 나중에 userID로 변경
-        comments: 0,
-      },
+      title,
+      description,
+      date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      user: 'User1', // 나중에 userID로 변경
+      comments: 0,
     };
     setHelpRequests(prev => [newPost, ...prev]);
     navigation.goBack();
