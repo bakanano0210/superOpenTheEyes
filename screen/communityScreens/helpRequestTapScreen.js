@@ -1,129 +1,137 @@
-// screen/CommunityScreens/HelpRequestTap
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
   TextInput,
   FlatList,
   TouchableOpacity,
-  Dimensions,
-  Alert,
+  StyleSheet,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMainContext} from '../../component/mainContext';
 
-const {width, height} = Dimensions.get('window');
-
 const HelpRequestTap = ({navigation}) => {
-  const {helpRequests, setHelpRequests} = useMainContext();
-  // 나중에 그림 url 추가할 것
-  const handleDelete = id => {
-    Alert.alert('삭제 확인', '이 항목을 삭제하시겠습니까?', [
-      {text: '취소', style: 'cancel'},
-      {
-        text: '삭제',
-        onPress: () =>
-          setHelpRequests(prev => prev.filter(item => item.id !== id)),
-        style: 'destructive',
-      },
-    ]);
-  };
-
-  const handleEditPost = post => {
-    navigation.navigate('HelpRequestPost', {
-      post,
-      onSave: updatedPost => {
-        setHelpRequests(prev =>
-          prev.map(item => (item.id === updatedPost.id ? updatedPost : item)),
-        );
-      },
-    });
+  const {helpRequests} = useMainContext();
+  const [searchText, setSearchText] = useState('');
+  const [filteredHelpRequests, setFilteredHelpRequests] =
+    useState(helpRequests);
+  const handleSearch = text => {
+    setSearchText(text);
+    const filtered = helpRequests.filter(post =>
+      post.title.toLowerCase().includes(text.toLowerCase()),
+    );
+    setFilteredHelpRequests(filtered);
   };
   const renderItem = ({item}) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('HelpRequestView', {post: item})}>
-      <View
-        style={{
-          padding: 16,
-          borderBottomWidth: 1,
-          borderBottomColor: '#ccc',
-          backgroundColor: 'white',
-          borderRadius: 8,
-          marginBottom: 8,
-        }}>
-        <View
-          style={{
-            justifyContent: 'space-between',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
+      <View style={styles.postContainer}>
+        <View style={styles.postHeader}>
           <View>
-            <Text style={{fontWeight: 'bold'}}>{item.title}</Text>
-            <Text>{item.description}</Text>
-          </View>
-          <View
-            style={{
-              position: 'relative',
-              width: 32,
-              height: 32,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Ionicons name="chatbubble-outline" size={32} color="#00a7eb" />
-            <Text
-              style={{
-                position: 'absolute',
-                textAlign: 'center',
-                color: '#00a7eb',
-                borderRadius: 12,
-                width: 18,
-                height: 18,
-                lineHeight: 18,
-                fontSize: 12,
-              }}>
-              {item.comments}
+            <Text style={styles.postTitle}>{item.title}</Text>
+            <Text style={styles.postDescription} numberOfLines={1}>
+              {item.description}
             </Text>
           </View>
+          <View style={styles.commentIconContainer}>
+            <Ionicons name="chatbubble-outline" size={32} color="#00a7eb" />
+            <Text style={styles.commentCount}>{item.comments}</Text>
+          </View>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: 5,
-          }}>
-          <Text style={{color: '#888'}}>{item.date}</Text>
-          <Text style={{color: '#888'}}>{item.user}</Text>
+        <View style={styles.postFooter}>
+          <Text style={styles.postDate}>{item.date}</Text>
+          <Text style={styles.postUser}>{item.user}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={{flex: 1, padding: 5}}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          height: 40,
-          borderColor: '#ccc',
-          borderWidth: 1,
-          borderRadius: 8,
-          paddingHorizontal: 8,
-          marginBottom: 8,
-          alignItems: 'center',
-        }}>
-        <TextInput style={{flex: 1}} placeholder="게시글 제목 검색..." />
-        <TouchableOpacity onPress={() => console.log('search clicked!!')}>
-          <Ionicons name="search" size={24} color="black" />
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="게시글 제목 검색..."
+          value={searchText}
+          onChangeText={handleSearch}
+        />
+        <Ionicons name="search" size={24} color="black" />
       </View>
       <FlatList
-        data={helpRequests}
+        data={filteredHelpRequests}
         renderItem={renderItem}
         keyExtractor={item => item.id}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 5,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  searchInput: {
+    flex: 1,
+  },
+  postContainer: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  postHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  postTitle: {
+    fontWeight: 'bold',
+  },
+  postDescription: {
+    color: '#333',
+  },
+  commentIconContainer: {
+    position: 'relative',
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  commentCount: {
+    position: 'absolute',
+    textAlign: 'center',
+    color: '#00a7eb',
+    borderRadius: 12,
+    width: 18,
+    height: 18,
+    lineHeight: 18,
+    fontSize: 12,
+  },
+  postFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 5,
+  },
+  postDate: {
+    color: '#888',
+  },
+  postUser: {
+    color: '#888',
+  },
+});
 
 export default HelpRequestTap;

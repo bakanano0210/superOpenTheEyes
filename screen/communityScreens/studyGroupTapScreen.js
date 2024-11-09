@@ -42,18 +42,18 @@ const StudyGroupTap = ({
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const leaderName = '로그인아이디';
   const [imageUri, setImageUri] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [filteredGroups, setFilteredGroups] = useState(studyGroups);
 
   const handleChoosePhoto = () => {
     launchImageLibrary(
       {
         mediaType: 'photo',
         includeBase64: false,
-        maxHeight: 200,
-        maxWidth: 200,
       },
       response => {
         if (response.didCancel) {
-          console.log('User cancelled image picker');
+          console.log('사용자 취소');
         } else if (response.errorMessage) {
           console.log('ImagePicker Error: ', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
@@ -117,6 +117,14 @@ const StudyGroupTap = ({
     setModalVisible(false);
     setIsEditMode(false);
     setImageUri('');
+  };
+
+  const handleSearch = text => {
+    setSearchText(text);
+    const filtered = studyGroups.filter(group =>
+      group.name.toLowerCase().includes(text.toLowerCase()),
+    );
+    setFilteredGroups(filtered);
   };
 
   const renderItem = ({item}) => (
@@ -232,14 +240,14 @@ const StudyGroupTap = ({
         <TextInput
           style={styles.searchInput}
           placeholder="스터디 그룹명 입력..."
+          value={searchText}
+          onChangeText={handleSearch}
         />
-        <TouchableOpacity onPress={() => console.log('search clicked!!')}>
-          <Ionicons name="search" size={24} color="black" />
-        </TouchableOpacity>
+        <Ionicons name="search" size={24} color="black" />
       </View>
 
       <FlatList
-        data={studyGroups}
+        data={filteredGroups}
         renderItem={renderItem}
         keyExtractor={item => item.id}
       />

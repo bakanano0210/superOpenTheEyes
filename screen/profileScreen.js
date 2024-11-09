@@ -1,19 +1,54 @@
-import React from 'react';
-import {View, Text, StyleSheet, Image, Dimensions} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {useMainContext} from '../component/mainContext';
 
 const {width} = Dimensions.get('window');
 
 const ProfileScreen = ({navigation}) => {
+  const {user, setUser} = useMainContext();
+  const handleChoosePhoto = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        includeBase64: false,
+      },
+      response => {
+        if (response.didCancel) {
+          console.log('사용자 취소');
+        } else if (response.errorMessage) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          const selectedUri = response.assets[0].uri;
+          setUser(prevUser => ({
+            ...prevUser,
+            profileImageUri: selectedUri,
+          }));
+        }
+      },
+    );
+  };
+  console.log(user);
   return (
     <View style={styles.container}>
-      <View style={styles.profileView}>
+      <TouchableOpacity style={styles.profileView} onPress={handleChoosePhoto}>
         <Image
-          source={require('../assets/exampleImg.png')}
+          source={
+            user.profileImageUri === ''
+              ? require('../assets/exampleImg.png')
+              : {uri: user.profileImageUri}
+          }
           resizeMode="contain"
           style={styles.profileImage}
         />
-      </View>
+      </TouchableOpacity>
 
       <Text style={styles.greetingText}>ESH님 안녕하세요!</Text>
       <Text style={styles.timerText}>02:05:04</Text>
@@ -21,7 +56,7 @@ const ProfileScreen = ({navigation}) => {
       <View style={styles.infoContainer}>
         <Text style={styles.infoText}>스터디 그룹 내 순위 : 3위</Text>
         <Text style={styles.infoText}>금일 학습 시간 랭킹 : 11위</Text>
-        <Text style={styles.infoText}>연속 공부 일수 : 2일째</Text>
+        <Text style={styles.infoText}>연속 출석 일수 : 2일째</Text>
         <Text style={styles.infoText}>
           참여하고 있는 스터디 : 우당탕탕 코린이들
         </Text>

@@ -34,6 +34,7 @@ export const MainProvider = ({children}) => {
       title: '도움 요청',
       description: '왜 오류가 나는지 모르겠습니다...',
       date: '2024.10.28 15:55:34',
+      userId: '1',
       user: 'User1',
       comments: 2,
       uri: [],
@@ -44,6 +45,7 @@ export const MainProvider = ({children}) => {
       description: '몇 시간을 때려박아도 모르겠어요ㅠㅠㅠ',
       date: '2024.10.25 12:31:32',
       user: 'User2',
+      userId: '2',
       comments: 1,
       uri: [],
     },
@@ -53,6 +55,7 @@ export const MainProvider = ({children}) => {
       description: '신경써서 한숨도 못잤습니다.',
       date: '2024.10.24 05:25:01',
       user: 'User3',
+      userId: '2',
       comments: 10,
       uri: [],
     },
@@ -127,9 +130,9 @@ export const MainProvider = ({children}) => {
   const [user, setUser] = useState({
     id: '1',
     name: 'user1',
-    profileImageUrl: '',
     studyGroupId: '2',
     studyTime: '00:00:00',
+    profileImageUri: '',
   });
   return (
     <MainContext.Provider

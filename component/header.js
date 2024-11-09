@@ -15,8 +15,14 @@ const {width} = Dimensions.get('window');
 
 export const HomeLeftHeader = () => {
   const {menuVisible, setMenuVisible} = useMainContext();
+
   return (
-    <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+    <TouchableOpacity
+      onPress={() => {
+        setMenuVisible(!menuVisible);
+        console.log(menuVisible);
+        console.log('leftHeader Click!!');
+      }}>
       <Ionicons name="menu" size={24} color="#000" />
     </TouchableOpacity>
   );
@@ -73,15 +79,10 @@ export const ProfileRightHeader = () => {
     </TouchableOpacity>
   );
 };
-export const CommunityOwnerRightHeader = () => {
+export const CommunityOwnerRightHeader = ({setMenuVisible}) => {
   return (
-    <TouchableOpacity onPress={() => {}}>
-      <Ionicons
-        name="ellipsis-vertical"
-        size={24}
-        color="#000"
-        style={styles.icon}
-      />
+    <TouchableOpacity onPress={() => setMenuVisible(true)}>
+      <Ionicons name="ellipsis-vertical" size={24} color="#000" />
     </TouchableOpacity>
   );
 };

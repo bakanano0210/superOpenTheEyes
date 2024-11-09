@@ -85,7 +85,7 @@ const HomeScreen = ({route, navigation}) => {
       studyTime: newTotalTime,
     }));
   }, [subjectCardInfoList, setUser]);
-  console.log(user);
+
   return (
     <View style={styles.homeContainer}>
       <SubjectModal
