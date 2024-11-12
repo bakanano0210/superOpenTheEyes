@@ -5,7 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 
 import {useMainContext} from './mainContext';
 
-export const CustomButton = ({onPress, text, style}) => {
+export const CustomButton = ({onPress, text}) => {
   return (
     <TouchableOpacity style={commonStyles.button} onPress={onPress}>
       <Text style={commonStyles.buttonText}>{text}</Text>

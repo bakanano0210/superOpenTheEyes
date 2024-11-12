@@ -64,11 +64,11 @@ export const commonStyles = StyleSheet.create({
     marginVertical: 5,
     paddingVertical: 15,
     borderRadius: 5,
-    alignItems: 'center',
   },
   menuText: {
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   // 공통 스타일 정의
 });

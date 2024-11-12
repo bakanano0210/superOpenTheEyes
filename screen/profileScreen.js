@@ -13,7 +13,7 @@ import {useMainContext} from '../component/mainContext';
 const {width} = Dimensions.get('window');
 
 const ProfileScreen = ({navigation}) => {
-  const {user, setUser} = useMainContext();
+  const {user, setUsers} = useMainContext();
   const handleChoosePhoto = () => {
     launchImageLibrary(
       {
@@ -27,10 +27,14 @@ const ProfileScreen = ({navigation}) => {
           console.log('ImagePicker Error: ', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
           const selectedUri = response.assets[0].uri;
-          setUser(prevUser => ({
-            ...prevUser,
+          // selectedUri이 변경될 때마다 user의  profileImageUri을 업데이트 후 users에 반영
+          const updatedUser = {
+            ...user,
             profileImageUri: selectedUri,
-          }));
+          };
+          setUsers(prevUsers =>
+            prevUsers.map(u => (u.id === updatedUser.id ? updatedUser : u)),
+          );
         }
       },
     );
@@ -51,7 +55,7 @@ const ProfileScreen = ({navigation}) => {
       </TouchableOpacity>
 
       <Text style={styles.greetingText}>ESH님 안녕하세요!</Text>
-      <Text style={styles.timerText}>02:05:04</Text>
+      <Text style={styles.timerText}>{user.studyTime}</Text>
 
       <View style={styles.infoContainer}>
         <Text style={styles.infoText}>스터디 그룹 내 순위 : 3위</Text>

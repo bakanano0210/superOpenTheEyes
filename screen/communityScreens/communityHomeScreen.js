@@ -20,7 +20,6 @@ const CommunityHomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   useEffect(() => {
-    console.log(initialIndex);
     setIndex(initialIndex);
   }, [initialIndex]);
 

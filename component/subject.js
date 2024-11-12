@@ -25,15 +25,12 @@ export const SubjectModal = ({
 }) => {
   const [subjectTitle, setSubjectTitle] = useState('');
   useEffect(() => {
-    console.log('isEdit ' + isEdit);
-    console.log('initial ' + initialTitle);
     if (visible) {
       setSubjectTitle(isEdit ? initialTitle : '');
     }
   }, [visible, isEdit, initialTitle]);
 
   const onChangeTitle = title => {
-    console.log(title);
     setSubjectTitle(title);
   };
   const handleSave = () => {
@@ -61,13 +58,11 @@ export const SubjectModal = ({
         title: subjectTitle,
         time: '00:00:00',
       };
-      console.log(newSubjectInfo);
       setSubjectCardInfoList([...subjectCardInfoList, newSubjectInfo]);
     }
     exit();
   };
   const exit = () => {
-    console.log(subjectCardInfoList);
     setSubjectTitle('');
     onClose();
   };
@@ -157,7 +152,6 @@ export const formatTime = studySeconds => {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 export const calculateTotalTime = ({subjectCardInfoList}) => {
-  console.log(subjectCardInfoList);
   const totalSeconds = subjectCardInfoList.reduce((acc, item) => {
     const [hours, minutes, seconds] = item.time.split(':').map(Number);
     return acc + hours * 3600 + minutes * 60 + seconds;

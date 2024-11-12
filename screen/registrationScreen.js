@@ -22,11 +22,14 @@ const RegistrationScreen = ({navigation}) => {
         <CustomLoginInput text="이메일을 입력하세요." condition={false} />
         <CustomLoginInput text="비밀번호를 입력하세요." condition={true} />
         <CustomLoginInput text="비밀번호 확인" condition={true} />
-        <CustomButton
-          navigation={navigation}
-          destination="Home"
-          text="회원가입"
-        />
+        <View>
+          <CustomButton
+            navigation={navigation}
+            destination="Home"
+            text="회원가입"
+          />
+        </View>
+
         <TouchableOpacity
           onPress={() => navigation.navigate('Login')}
           style={styles.loginButtonStyle}>
@@ -50,6 +53,7 @@ const styles = StyleSheet.create({
   },
   downContainer: {
     flex: 1,
+    backgroundColor: '#f00',
   },
   loginButtonStyle: {
     paddingVertical: 10,

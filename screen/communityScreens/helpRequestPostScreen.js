@@ -16,7 +16,7 @@ import {CustomButton} from '../../component/custom';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const HelpRequestPostScreen = ({navigation}) => {
-  const {setHelpRequests, user} = useMainContext();
+  const {setHelpRequests, user, helpRequests} = useMainContext();
   const route = useRoute();
   const {post} = route.params || {};
   const [title, setTitle] = useState();
@@ -76,6 +76,7 @@ const HelpRequestPostScreen = ({navigation}) => {
       navigation.goBack();
     }
   };
+  console.log(helpRequests);
   const handleDeleteImage = uri => {
     setImageUris(prevUris => prevUris.filter(item => item !== uri)); // 선택한 이미지 URI 삭제
   };
@@ -204,8 +205,8 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     position: 'absolute',
-    top: -5,
-    right: -5,
+    top: -3,
+    right: -3,
     backgroundColor: 'white',
     borderRadius: 12,
   },

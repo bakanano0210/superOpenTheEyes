@@ -13,7 +13,7 @@ import {useMainContext} from '../../component/mainContext';
 import {CustomButton} from '../../component/custom';
 
 const QuizPostScreen = ({route}) => {
-  const {quizzes, setQuizzes} = useMainContext();
+  const {setQuizzes} = useMainContext();
   const navigation = useNavigation();
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -29,8 +29,8 @@ const QuizPostScreen = ({route}) => {
       answer,
       date: new Date().toISOString().slice(0, 19).replace('T', ' '),
       user: 'User1', // 나중에 userID로 변경
-      likes: 0,
-      dislikes: 0,
+      likes: [],
+      dislikes: [],
       userLiked: false,
       userDisliked: false,
     };

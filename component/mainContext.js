@@ -1,6 +1,6 @@
 // 프로젝트에서 전체적으로 공유할 변수 목록
 
-import React, {createContext, useState, useContext} from 'react';
+import React, {createContext, useState, useContext, useEffect} from 'react';
 
 const MainContext = createContext();
 
@@ -8,18 +8,18 @@ export const MainProvider = ({children}) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [studyGroups, setStudyGroups] = useState([
     {
-      id: '1',
-      leaderId: '1',
+      id: '2',
+      leaderId: '2',
       name: '감자머리 신짱구',
-      members: 2,
+      members: 23,
       leaderName: '그룹장',
       description: '임시',
-      limit: 5,
+      limit: 50,
       imageUri: '',
     },
     {
-      id: '2',
-      leaderId: 'user123',
+      id: '1',
+      leaderId: '3',
       name: '우당탕탕 코린이들',
       members: 3,
       leaderName: 'HDH',
@@ -52,7 +52,7 @@ export const MainProvider = ({children}) => {
     {
       id: '3',
       title: '아.. 진짜 탈모 올 것 같습니다...',
-      description: '신경써서 한숨도 못잤습니다.',
+      description: '신경쓰여서 한숨도 못잤습니다.',
       date: '2024.10.24 05:25:01',
       user: 'User3',
       userId: '2',
@@ -83,16 +83,23 @@ export const MainProvider = ({children}) => {
       date: '2024.09.28.16:12:10',
     },
   ]);
+  // { quizz와 quizzReaction Join
+  //   id: '1',
+  //   question: '질문 1',
+  //   answer: '답변 1',
+  //   user: 'User1',
+  //   date: '2024-10-01',
+  //   likes: ['user1', 'user2'], // 좋아요를 누른 사용자 ID 배열
+  //   dislikes: ['user3'], // 싫어요를 누른 사용자 ID 배열
+  // },
   const [quizzes, setQuizzes] = useState([
     {
       id: '1',
       question: '화장실에서 금방 나온 사람은?',
       answer: '일본사람',
       user: 'User1',
-      likes: 30,
-      dislikes: 12,
-      userLiked: false,
-      userDisliked: false,
+      likes: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+      dislikes: ['11', '12', '13', '14', '15', '16'],
       date: new Date('2024-11-03T10:00:00')
         .toISOString()
         .slice(0, 19)
@@ -103,10 +110,8 @@ export const MainProvider = ({children}) => {
       question: '제주 앞바다의 반댓말은?',
       answer: '제주 엄마다',
       user: 'User2',
-      likes: 10,
-      dislikes: 25,
-      userLiked: false,
-      userDisliked: false,
+      likes: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'],
+      dislikes: ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
       date: new Date('2024-11-04T12:00:00')
         .toISOString()
         .slice(0, 19)
@@ -117,23 +122,208 @@ export const MainProvider = ({children}) => {
       question: '남자는 힘이다. 그러면 여자는?',
       answer: '헐',
       user: 'User3',
-      likes: 0,
-      dislikes: 16,
-      userLiked: false,
-      userDisliked: false,
+      likes: [],
+      dislikes: ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
       date: new Date('2024-11-02T08:00:00')
         .toISOString()
         .slice(0, 19)
         .replace('T', ' '),
     },
   ]);
-  const [user, setUser] = useState({
-    id: '1',
-    name: 'user1',
-    studyGroupId: '2',
-    studyTime: '00:00:00',
-    profileImageUri: '',
-  });
+
+  // users 목록에서 로그인한 사용자 정보 찾기
+
+  const [users, setUsers] = useState([
+    {
+      id: '1',
+      name: 'ESH',
+      studyGroupId: '1',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '2',
+      name: 'HDH',
+      studyGroupId: '1',
+      studyTime: '04:35:21',
+      profileImageUri: '',
+    },
+    {
+      id: '3',
+      name: 'PSU',
+      studyGroupId: '1',
+      studyTime: '03:22:15',
+      profileImageUri: '',
+    },
+    {
+      id: '4',
+      name: 'user1',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '5',
+      name: 'user2',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '6',
+      name: 'ESH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '7',
+      name: 'HDH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '8',
+      name: 'PSU',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '9',
+      name: 'ESH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '10',
+      name: 'HDH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '11',
+      name: 'PSU',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '12',
+      name: 'ESH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '13',
+      name: 'HDH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '14',
+      name: 'PSU',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '15',
+      name: 'ESH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '16',
+      name: 'HDH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '17',
+      name: 'PSU',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '18',
+      name: 'ESH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '19',
+      name: 'HDH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '20',
+      name: 'PSU',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '21',
+      name: 'ESH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '22',
+      name: 'HDH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '23',
+      name: 'PSU',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '24',
+      name: 'ESH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '25',
+      name: 'HDH',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+    {
+      id: '26',
+      name: 'PSU',
+      studyGroupId: '2',
+      studyTime: '00:00:00',
+      profileImageUri: '',
+    },
+  ]);
+  const [user, setUser] = useState(null);
+  const loggedInUserId = '1';
+
+  useEffect(() => {
+    const loggedInUser = users.find(u => u.id === loggedInUserId);
+    setUser(loggedInUser);
+  }, [users]);
   return (
     <MainContext.Provider
       value={{
@@ -149,6 +339,8 @@ export const MainProvider = ({children}) => {
         setStudyGroups,
         user,
         setUser,
+        users,
+        setUsers,
       }}>
       {children}
     </MainContext.Provider>

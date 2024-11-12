@@ -23,14 +23,14 @@ import {useMainContext} from '../../component/mainContext';
 const {width} = Dimensions.get('window');
 
 const HomeScreen = ({route, navigation}) => {
-  const {user, setUser} = useMainContext();
+  const {setUsers, users, user} = useMainContext();
   const [subjectCardInfoList, setSubjectCardInfoList] = useState([]); // 사용자 과목 리스트
   const [mode, setMode] = useState(null); // 과목 수정 및 추가 모드 결정
   const [modalOptionVisible, setModalOptionVisible] = useState(false); // 수정 및 추가 모달 렌더링 유무
   const [editingKey, setEditingKey] = useState(null); // 수정할 과목의 key 정보
   const [selectedItem, setSelectedItem] = useState(null); // 선택 과목 정보
   const [totalTime, setTotalTime] = useState('00:00:00');
-
+  console.log(user);
   const handleDelete = key => {
     Alert.alert('삭제', '해당 과목을 삭제하시겠습니까?', [
       {text: '취소', style: 'cancel'},
@@ -79,13 +79,14 @@ const HomeScreen = ({route, navigation}) => {
   useEffect(() => {
     const newTotalTime = calculateTotalTime({subjectCardInfoList});
     setTotalTime(newTotalTime);
-    // totalTime이 변경될 때마다 user의 studyTime을 업데이트
-    setUser(prevUser => ({
-      ...prevUser,
-      studyTime: newTotalTime,
-    }));
-  }, [subjectCardInfoList, setUser]);
-
+    // totalTime이 변경될 때마다 user의 studyTime을 업데이트 후 users에 반영
+    if (user && user.studyTime !== newTotalTime) {
+      const updatedUser = {...user, studyTime: newTotalTime};
+      setUsers(prevUsers =>
+        prevUsers.map(u => (u.id === updatedUser.id ? updatedUser : u)),
+      );
+    }
+  }, [subjectCardInfoList, user, setUsers]);
   return (
     <View style={styles.homeContainer}>
       <SubjectModal

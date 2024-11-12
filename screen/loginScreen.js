@@ -101,11 +101,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
   },
-  buttonView: {},
+  buttonView: {alignItems: 'center'},
   loginButtonStyle: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    alignSelf: 'center',
   },
   loginText: {
     color: '#000',

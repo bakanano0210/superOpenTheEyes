@@ -19,7 +19,7 @@ import {useMainContext} from '../../component/mainContext';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const {width, height} = Dimensions.get('window');
-const tempUserId = 'user123';
+const tempUserId = '1';
 
 const StudyGroupTap = ({
   modalVisible,
@@ -44,7 +44,7 @@ const StudyGroupTap = ({
   const [imageUri, setImageUri] = useState('');
   const [searchText, setSearchText] = useState('');
   const [filteredGroups, setFilteredGroups] = useState(studyGroups);
-
+  const {user, setUsers} = useMainContext();
   const handleChoosePhoto = () => {
     launchImageLibrary(
       {
@@ -58,6 +58,7 @@ const StudyGroupTap = ({
           console.log('ImagePicker Error: ', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
           setImageUri(response.assets[0].uri);
+          console.log(response);
         }
       },
     );
@@ -90,22 +91,32 @@ const StudyGroupTap = ({
             }
           : group,
       );
-      console.log(updatedGroups);
       setStudyGroups(updatedGroups);
     } else {
+      // user의 studyGroupId가 0이 아니면 이미 가입한 그룹이 있는 것으로 간주
+      if (user.studyGroupId !== 0) {
+        Alert.alert('생성 불가', '이미 가입된 스터디 그룹이 있습니다.');
+        return; // 그룹 생성 프로세스 중지
+      }
       const currentTime = Date.now().toString();
       const newGroupId = `${leaderName}-${currentTime}`;
       const newGroup = {
         id: newGroupId,
-        leaderId: tempUserId,
+        leaderId: user.id,
         name: newGroupName,
         members: 1,
-        leaderName: leaderName,
+        leaderName: user.name,
         description: newGroupDescription,
         limit: newGroupLimit,
         imageUri: imageUri,
       };
       setStudyGroups([newGroup, ...studyGroups]);
+
+      setUsers(prevUsers =>
+        prevUsers.map(u =>
+          u.id === user.id ? {...u, studyGroupId: newGroupId} : u,
+        ),
+      );
     }
     handleCancle();
   };
@@ -119,17 +130,16 @@ const StudyGroupTap = ({
     setImageUri('');
   };
 
-  const handleSearch = text => {
-    setSearchText(text);
+  useEffect(() => {
     const filtered = studyGroups.filter(group =>
-      group.name.toLowerCase().includes(text.toLowerCase()),
+      group.name.toLowerCase().includes(searchText.toLowerCase()),
     );
     setFilteredGroups(filtered);
-  };
+  }, [studyGroups, searchText]);
 
   const renderItem = ({item}) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate('StudyGroupDetail', {item: item})}>
+      onPress={() => navigation.navigate('StudyGroupDetail', {info: item})}>
       <View style={styles.groupContainer}>
         <View style={styles.iconPlaceholder}>
           <Image
@@ -184,31 +194,35 @@ const StudyGroupTap = ({
         transparent={true}
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}>
-        <KeyboardAvoidingView style={styles.modalBackground} behavior="padding">
+        <KeyboardAvoidingView style={styles.modalBackground} behavior="height">
           <View style={styles.modalContainer}>
-            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <ScrollView
+              contentContainerStyle={styles.scrollViewContent}
+              keyboardShouldPersistTaps="handled">
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <View style={styles.iconPlaceholder}>
                     <TouchableOpacity onPress={handleChoosePhoto}>
                       {imageUri === '' ? (
-                        <Ionicons name="image" size={24} color="#014099" />
+                        <Ionicons name="image" size={48} color="#014099" />
                       ) : (
                         <Image
                           source={{uri: imageUri}}
                           resizeMode="contain"
-                          style={{width: 32, height: 32}}
+                          style={{width: 56, height: 56}}
                         />
                       )}
                     </TouchableOpacity>
                   </View>
                   <View style={styles.inputContainer}>
+                    <Text style={styles.label}>그룹명</Text>
                     <TextInput
                       style={styles.modalInput}
-                      placeholder="스터디 그룹명 입력"
+                      placeholder="스터디 그룹명"
                       value={newGroupName}
                       onChangeText={setNewGroupName}
                     />
+                    <Text style={styles.label}>제한인원</Text>
                     <TextInput
                       style={styles.modalInput}
                       placeholder="제한인원"
@@ -241,7 +255,7 @@ const StudyGroupTap = ({
           style={styles.searchInput}
           placeholder="스터디 그룹명 입력..."
           value={searchText}
-          onChangeText={handleSearch}
+          onChangeText={setSearchText}
         />
         <Ionicons name="search" size={24} color="black" />
       </View>
@@ -270,6 +284,8 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     width: '90%',
+    maxHeight: '90%',
+    overflow: 'hidden',
   },
   keyboardView: {
     flex: 1,
@@ -283,12 +299,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modalContent: {
-    width: '100%',
-    maxHeight: '70%',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
-    minHeight: '50%',
+    overflow: 'hidden',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -297,6 +311,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
   },
+  label: {fontSize: 14, color: '#444', marginBottom: 5},
   iconPlaceholder: {
     width: 72,
     height: 72,
@@ -347,9 +362,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
-    paddingLeft: 10,
+    padding: 10,
     marginBottom: 10,
     fontSize: 16,
+    height: 45,
   },
   textArea: {
     height: '30%',

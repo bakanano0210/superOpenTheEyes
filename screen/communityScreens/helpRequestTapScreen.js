@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -15,13 +15,12 @@ const HelpRequestTap = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
   const [filteredHelpRequests, setFilteredHelpRequests] =
     useState(helpRequests);
-  const handleSearch = text => {
-    setSearchText(text);
+  useEffect(() => {
     const filtered = helpRequests.filter(post =>
-      post.title.toLowerCase().includes(text.toLowerCase()),
+      post.title.toLowerCase().includes(searchText.toLowerCase()),
     );
     setFilteredHelpRequests(filtered);
-  };
+  }, [helpRequests, searchText]);
   const renderItem = ({item}) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('HelpRequestView', {post: item})}>
@@ -53,7 +52,7 @@ const HelpRequestTap = ({navigation}) => {
           style={styles.searchInput}
           placeholder="게시글 제목 검색..."
           value={searchText}
-          onChangeText={handleSearch}
+          onChangeText={setSearchText}
         />
         <Ionicons name="search" size={24} color="black" />
       </View>
