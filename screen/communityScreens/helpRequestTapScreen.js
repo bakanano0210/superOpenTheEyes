@@ -21,6 +21,7 @@ const HelpRequestTap = ({navigation}) => {
     );
     setFilteredHelpRequests(filtered);
   }, [helpRequests, searchText]);
+
   const renderItem = ({item}) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('HelpRequestView', {post: item})}>

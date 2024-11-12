@@ -45,6 +45,7 @@ const StudyGroupTap = ({
   const [searchText, setSearchText] = useState('');
   const [filteredGroups, setFilteredGroups] = useState(studyGroups);
   const {user, setUsers} = useMainContext();
+
   const handleChoosePhoto = () => {
     launchImageLibrary(
       {
@@ -58,7 +59,6 @@ const StudyGroupTap = ({
           console.log('ImagePicker Error: ', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
           setImageUri(response.assets[0].uri);
-          console.log(response);
         }
       },
     );

@@ -22,7 +22,6 @@ const CommunityHomeScreen = () => {
   useEffect(() => {
     setIndex(initialIndex);
   }, [initialIndex]);
-
   const [routes] = useState([
     {key: 'first', title: '스터디그룹'},
     {key: 'second', title: '도움 요청'},

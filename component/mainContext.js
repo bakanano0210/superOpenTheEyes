@@ -79,7 +79,7 @@ export const MainProvider = ({children}) => {
       id: '3',
       postId: '2',
       user: 'User 2',
-      content: '엌ㅋㅋㅋㅋㅋ?',
+      content: '흠..',
       date: '2024.09.28.16:12:10',
     },
   ]);
