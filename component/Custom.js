@@ -12,13 +12,15 @@ export const CustomButton = ({onPress, text}) => {
     </TouchableOpacity>
   );
 };
-export const CustomLoginInput = ({text, condition}) => {
+export const CustomLoginInput = ({text, condition, func, value}) => {
   return (
     <TextInput
       style={commonStyles.input}
       placeholder={text}
       placeholderTextColor="#999"
       secureTextEntry={condition}
+      onChangeText={func}
+      value={value}
     />
   );
 };

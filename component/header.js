@@ -5,11 +5,13 @@ import {
   StyleSheet,
   Dimensions,
   View,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {TabBar} from 'react-native-tab-view';
 import {useMainContext} from './mainContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width} = Dimensions.get('window');
 
@@ -68,8 +70,25 @@ export const StudyingRightHeader = () => {
 };
 export const ProfileRightHeader = () => {
   console.log('ProfileRightHeader Called');
+  const navigation = useNavigation();
+  // 로그아웃 함수 정의
+  const logout = async () => {
+    try {
+      // 토큰 삭제
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('rememberMe'); // 로그인 유지 플래그 삭제
+
+      // 알림을 표시하고 로그인 화면으로 이동
+      Alert.alert('로그아웃', '로그아웃되었습니다.', [
+        {text: '확인', onPress: () => navigation.navigate('Login')},
+      ]);
+      console.log('로그아웃 성공');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+  };
   return (
-    <TouchableOpacity onPress={() => console.log('로그아웃 pressed!')}>
+    <TouchableOpacity onPress={logout}>
       <Ionicons
         name="log-out-outline"
         size={24}

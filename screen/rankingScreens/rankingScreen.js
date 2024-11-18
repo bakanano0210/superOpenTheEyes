@@ -10,7 +10,7 @@ import {
 import React, {useState} from 'react';
 import {TabView} from 'react-native-tab-view';
 import {customRenderTabBar} from '../../component/header';
-import {timeToSeconds, formatTime} from '../../component/subject';
+import {formatTime} from '../../component/subject';
 import {useMainContext} from '../../component/mainContext';
 
 const {width} = Dimensions.get('window');
@@ -22,71 +22,10 @@ const formatDate = () => {
     day: '2-digit',
   });
 };
-const data = [
-  // user, studyGroup Join
-  {
-    key: 1,
-    name: 'PSU',
-    time: '03:22:15',
-    studyGroupId: '1',
-    studyGroup: '우당탕탕 코린이들',
-    leaderName: 'HDH',
-    members: 3,
-    limit: 3,
-  },
-  {
-    key: 2,
-    name: 'ESH',
-    time: '01:59:32',
-    studyGroupId: '1',
-    studyGroup: '우당탕탕 코린이들',
-    leaderName: 'HDH',
-    members: 3,
-    limit: 3,
-  },
-  {
-    key: 3,
-    name: '그룹장',
-    time: '01:59:43',
-    studyGroupId: '2',
-    studyGroup: '감자머리 신짱구',
-    leaderName: '그룹장',
-    members: 2,
-    limit: 5,
-  },
-  {
-    key: 4,
-    name: 'HDH',
-    time: '04:35:21',
-    studyGroupId: '1',
-    studyGroup: '우당탕탕 코린이들',
-    leaderName: 'HDH',
-    members: 3,
-    limit: 3,
-  },
-  {
-    key: 5,
-    name: 'User2',
-    time: '01:22:59',
-    studyGroupId: '2',
-    studyGroup: '감자머리 신짱구',
-    leaderName: '그룹장',
-    members: 2,
-    limit: 5,
-  },
-];
+
 const DailyRankingTap = ({currentUser}) => {
+  const {rankedDaily} = useMainContext();
   // 데이터 정렬 및 랭킹 추가
-  const rankedData = data
-    .map(item => ({
-      ...item,
-      timeInSeconds: timeToSeconds(item.time), // 초로 변환된 시간 추가
-    }))
-    .sort((a, b) => b.timeInSeconds - a.timeInSeconds) // 시간 내림차순 정렬
-    .map((item, index) => ({
-      ...item,
-      rank: index + 1, // 순위 부여
-    }));
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
       <Text style={styles.rankText}>{item.rank}</Text>
@@ -110,7 +49,7 @@ const DailyRankingTap = ({currentUser}) => {
       <Text style={styles.timerText}>{currentUser.studyTime}</Text>
 
       <FlatList
-        data={rankedData}
+        data={rankedDaily}
         renderItem={renderItem}
         keyExtractor={item => item.rank.toString()}
         contentContainerStyle={styles.listContent}
@@ -119,26 +58,8 @@ const DailyRankingTap = ({currentUser}) => {
   );
 };
 const GroupRankingTap = ({currentUser}) => {
+  const {rankedGroup} = useMainContext();
   // 그룹별로 데이터를 분류하고 시간 총합 계산
-  const groupRankingData = data
-    .reduce((acc, item) => {
-      const group = acc.find(g => g.studyGroup === item.studyGroup);
-      const totalSeconds = timeToSeconds(item.time);
-      if (group) {
-        group.totalTime += totalSeconds;
-      } else {
-        acc.push({
-          studyGroup: item.studyGroup,
-          totalTime: totalSeconds,
-          members: item.members,
-          limit: item.limit,
-          leaderName: item.leaderName,
-        });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => b.totalTime - a.totalTime) // 총 학습 시간을 기준으로 정렬
-    .map((item, index) => ({...item, rank: index + 1})); // 순위 설정
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
       <Text style={styles.rankText}>{item.rank}</Text>
@@ -165,7 +86,7 @@ const GroupRankingTap = ({currentUser}) => {
       <Text style={styles.timerText}>{currentUser.studyTime}</Text>
 
       <FlatList
-        data={groupRankingData}
+        data={rankedGroup}
         renderItem={renderItem}
         keyExtractor={item => item.rank.toString()}
         contentContainerStyle={styles.listContent}
@@ -174,19 +95,8 @@ const GroupRankingTap = ({currentUser}) => {
   );
 };
 const RankingInGroupTap = ({currentUser}) => {
-  // studyGroupId가 일치하는 사용자만 필터링하고, 시간을 기준으로 정렬하여 순위 추가
-  const filteredData = data
-    .filter(item => item.studyGroupId === currentUser.studyGroupId)
-    .map(item => ({
-      ...item,
-      timeInSeconds: timeToSeconds(item.time),
-    }))
-    .sort((a, b) => b.timeInSeconds - a.timeInSeconds)
-    .map((item, index) => ({
-      ...item,
-      rank: index + 1,
-    }));
-  console.log(filteredData);
+  const {rankedInGroup} = useMainContext();
+
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
       <Text style={styles.rankText}>{item.rank}</Text>
@@ -211,7 +121,7 @@ const RankingInGroupTap = ({currentUser}) => {
       <Text style={styles.timerText}>{currentUser.studyTime}</Text>
 
       <FlatList
-        data={filteredData}
+        data={rankedInGroup}
         renderItem={renderItem}
         keyExtractor={item => item.key.toString()}
         contentContainerStyle={styles.listContent}

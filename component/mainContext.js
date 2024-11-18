@@ -1,7 +1,7 @@
 // 프로젝트에서 전체적으로 공유할 변수 목록
 
 import React, {createContext, useState, useContext, useEffect} from 'react';
-
+import {timeToSeconds} from './subject';
 const MainContext = createContext();
 
 export const MainProvider = ({children}) => {
@@ -65,6 +65,7 @@ export const MainProvider = ({children}) => {
       id: '1',
       postId: '1',
       user: 'User 9',
+      userId: '9',
       content: '이래해서 이러하고 저래해서 이렇게 해야해요 !',
       date: '2024.09.28.15:55:34',
     },
@@ -72,13 +73,15 @@ export const MainProvider = ({children}) => {
       id: '2',
       postId: '1',
       user: 'User 2',
-      content: '머함?',
+      userId: '2',
+      content: '잘 모르겠어요.',
       date: '2024.09.28.16:12:10',
     },
     {
       id: '3',
       postId: '2',
       user: 'User 2',
+      userId: '2',
       content: '흠..',
       date: '2024.09.28.16:12:10',
     },
@@ -140,6 +143,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '1',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '2',
@@ -147,6 +152,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '1',
       studyTime: '04:35:21',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '3',
@@ -154,6 +161,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '1',
       studyTime: '03:22:15',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '4',
@@ -161,6 +170,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '5',
@@ -168,6 +179,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '6',
@@ -175,6 +188,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '7',
@@ -182,6 +197,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '8',
@@ -189,6 +206,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '9',
@@ -196,6 +215,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '10',
@@ -203,6 +224,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '11',
@@ -210,6 +233,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '12',
@@ -217,6 +242,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '13',
@@ -224,6 +251,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '14',
@@ -231,6 +260,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '15',
@@ -238,6 +269,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '16',
@@ -245,6 +278,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '17',
@@ -252,6 +287,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '18',
@@ -259,6 +296,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '19',
@@ -266,6 +305,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '20',
@@ -273,6 +314,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '21',
@@ -280,6 +323,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '22',
@@ -287,6 +332,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '23',
@@ -294,6 +341,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '24',
@@ -301,6 +350,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '25',
@@ -308,6 +359,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
     {
       id: '26',
@@ -315,6 +368,8 @@ export const MainProvider = ({children}) => {
       studyGroupId: '2',
       studyTime: '00:00:00',
       profileImageUri: '',
+      helpGivenCount: 0,
+      helpReceivedCount: 0,
     },
   ]);
   const [user, setUser] = useState(null);
@@ -324,6 +379,124 @@ export const MainProvider = ({children}) => {
     const loggedInUser = users.find(u => u.id === loggedInUserId);
     setUser(loggedInUser);
   }, [users]);
+  const [rankingData, setRankignData] = useState([
+    // user, studyGroup Join
+    {
+      key: 1,
+      name: 'PSU',
+      time: '03:22:15',
+      studyGroupId: '1',
+      studyGroup: '우당탕탕 코린이들',
+      leaderName: 'HDH',
+      members: 3,
+      limit: 3,
+      imageUri: '',
+      profileImageUri: '',
+    },
+    {
+      key: 2,
+      name: 'ESH',
+      time: '01:59:32',
+      studyGroupId: '1',
+      studyGroup: '우당탕탕 코린이들',
+      leaderName: 'HDH',
+      members: 3,
+      limit: 3,
+      imageUri: '',
+      profileImageUri: '',
+    },
+    {
+      key: 3,
+      name: '그룹장',
+      time: '01:59:43',
+      studyGroupId: '2',
+      studyGroup: '감자머리 신짱구',
+      leaderName: '그룹장',
+      members: 2,
+      limit: 5,
+      imageUri: '',
+      profileImageUri: '',
+    },
+    {
+      key: 4,
+      name: 'HDH',
+      time: '04:35:21',
+      studyGroupId: '1',
+      studyGroup: '우당탕탕 코린이들',
+      leaderName: 'HDH',
+      members: 3,
+      limit: 3,
+      imageUri: '',
+      profileImageUri: '',
+    },
+    {
+      key: 5,
+      name: 'User2',
+      time: '01:22:59',
+      studyGroupId: '2',
+      studyGroup: '감자머리 신짱구',
+      leaderName: '그룹장',
+      members: 2,
+      limit: 5,
+      imageUri: '',
+      profileImageUri: '',
+    },
+  ]);
+  const [rankedDaily, setRankedDaily] = useState([]);
+  const [rankedGroup, setRankedGroup] = useState([]);
+  const [rankedInGroup, setRankedInGroup] = useState([]);
+  useEffect(() => {
+    // 일일 랭킹 계산
+    const dailyRanking = rankingData
+      .map(item => ({
+        ...item,
+        timeInSeconds: timeToSeconds(item.time),
+      }))
+      .sort((a, b) => b.timeInSeconds - a.timeInSeconds)
+      .map((item, index) => ({
+        ...item,
+        rank: index + 1,
+      }));
+    setRankedDaily(dailyRanking);
+
+    // 그룹 랭킹 계산
+    const groupRanking = rankingData
+      .reduce((acc, item) => {
+        const group = acc.find(g => g.studyGroup === item.studyGroup);
+        const totalSeconds = timeToSeconds(item.time);
+        if (group) {
+          group.totalTime += totalSeconds;
+        } else {
+          acc.push({
+            studyGroup: item.studyGroup,
+            totalTime: totalSeconds,
+            members: item.members,
+            limit: item.limit,
+            leaderName: item.leaderName,
+          });
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => b.totalTime - a.totalTime)
+      .map((item, index) => ({...item, rank: index + 1}));
+    setRankedGroup(groupRanking);
+
+    // 그룹 내 랭킹 계산
+    if (user) {
+      const inGroupRanking = rankingData
+        .filter(item => item.studyGroupId === user.studyGroupId)
+        .map(item => ({
+          ...item,
+          timeInSeconds: timeToSeconds(item.time),
+        }))
+        .sort((a, b) => b.timeInSeconds - a.timeInSeconds)
+        .map((item, index) => ({
+          ...item,
+          rank: index + 1,
+        }));
+      setRankedInGroup(inGroupRanking);
+    }
+  }, [user, rankingData]);
   return (
     <MainContext.Provider
       value={{
@@ -341,6 +514,9 @@ export const MainProvider = ({children}) => {
         setUser,
         users,
         setUsers,
+        rankedDaily,
+        rankedGroup,
+        rankedInGroup,
       }}>
       {children}
     </MainContext.Provider>

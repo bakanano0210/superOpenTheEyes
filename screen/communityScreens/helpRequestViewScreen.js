@@ -1,5 +1,5 @@
 import {useRoute} from '@react-navigation/native';
-import React, {useLayoutEffect, useRef, useState} from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   TextInput,
   Keyboard,
-  ScrollView,
   Dimensions,
   Modal,
   Alert,
@@ -22,12 +21,13 @@ import {CommunityOwnerRightHeader} from '../../component/header';
 const {width, height} = Dimensions.get('window');
 
 const HelpRequestViewScreen = ({navigation}) => {
-  const {helpRequests, setHelpRequests, user} = useMainContext();
+  const {setHelpRequests, user} = useMainContext();
   const route = useRoute();
   const {post} = route.params;
   const {comments, setComments} = useMainContext();
   const [newComment, setNewComment] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
 
   const isAuthor = user.id === post.userId;
   useLayoutEffect(() => {
@@ -42,45 +42,46 @@ const HelpRequestViewScreen = ({navigation}) => {
     comment => comment.postId === post.id,
   );
 
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      const newCommentObj = {
-        id: Date.now().toString(), // 고유 ID 생성
-        postId: post.id,
-        user: user.name, // 현재 로그인된 User로 변경 예정
-        content: newComment,
-        date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      };
+  const renderComment = ({item}) => {
+    const isCommentAuthor = item.userId === user.id;
+    return (
+      <View style={styles.commentContainer}>
+        <View>
+          <Text style={styles.commentUser}>{item.user}</Text>
+          <Text style={styles.commentContent}>{item.content}</Text>
+          <Text style={styles.commentDate}>{item.date}</Text>
+        </View>
 
-      // 새로운 댓글 추가 및 상태 업데이트
-      setComments([...comments, newCommentObj]);
-      setNewComment(''); // 입력 필드 초기화
-      Keyboard.dismiss();
-
-      setHelpRequests(prevHelpRequests => {
-        const updatedHelpRequests = prevHelpRequests.map(item =>
-          item.id === post.id
-            ? {
-                ...item,
-                comments: item.comments + 1,
-              }
-            : item,
-        );
-        console.log('Updated Help Requests: ', updatedHelpRequests);
-        return updatedHelpRequests; // map 결과 반환
-      });
-    }
-    console.log(helpRequests);
+        {isCommentAuthor ? (
+          <View style={styles.commentActions}>
+            <TouchableOpacity onPress={() => handleCommentDelete(item)}>
+              <Ionicons name="close" size={20} color="#000" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleEditComment(item)}>
+              <Ionicons name="pencil" size={20} color="#000" />
+            </TouchableOpacity>
+          </View>
+        ) : null}
+      </View>
+    );
   };
 
-  const renderComment = ({item}) => (
-    <View style={styles.commentContainer}>
-      <Text style={styles.commentUser}>{item.user}</Text>
-      <Text style={styles.commentContent}>{item.content}</Text>
-      <Text style={styles.commentDate}>{item.date}</Text>
+  const renderPostHeader = () => (
+    <View style={styles.postContainer}>
+      <Text style={styles.postTitle}>{post.title}</Text>
+      <Text style={styles.postUser}>{post.user}</Text>
+      <Text style={styles.postDate}>{post.date}</Text>
+      <Text style={styles.postContent}>{post.description}</Text>
+      {post.uri.map((uri, index) => (
+        <Image key={index} source={{uri}} style={styles.postImage} />
+      ))}
+
+      {/* "댓글" 헤더 추가 */}
+      <View style={styles.commentsHeaderContainer} />
     </View>
   );
 
+  /* 게시글 관리 함수 */
   const handleEdit = () => {
     setMenuVisible(false);
     navigation.navigate('HelpRequestPost', {post});
@@ -99,26 +100,74 @@ const HelpRequestViewScreen = ({navigation}) => {
       },
     ]);
   };
-  console.log(post);
+
+  /* 댓글 관리 함수 */
+  const handleAddOrEditComment = () => {
+    if (newComment.trim()) {
+      if (editingCommentId) {
+        setComments(prevComments =>
+          prevComments.map(comment =>
+            comment.id === editingCommentId
+              ? {
+                  ...comment,
+                  content: newComment,
+                  date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                }
+              : comment,
+          ),
+        );
+        setEditingCommentId(null);
+      } else {
+        const newCommentObj = {
+          id: Date.now().toString(), // 고유 ID 생성
+          postId: post.id,
+          userId: user.id,
+          user: user.name, // 현재 로그인된 User로 변경 예정
+          content: newComment,
+          date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        };
+
+        // 새로운 댓글 추가 및 상태 업데이트
+        setComments([...comments, newCommentObj]);
+        setHelpRequests(prevHelpRequests =>
+          prevHelpRequests.map(item =>
+            item.id === post.id
+              ? {
+                  ...item,
+                  comments: item.comments + 1,
+                }
+              : item,
+          ),
+        );
+      }
+      setNewComment(''); // 입력 필드 초기화
+      Keyboard.dismiss();
+    }
+  };
+  const handleEditComment = comment => {
+    setEditingCommentId(comment.id);
+    setNewComment(comment.content);
+  };
+  const handleCommentDelete = comment => {
+    Alert.alert('삭제 확인', '이 항목을 삭제하시겠습니까?', [
+      {text: '취소', style: 'cancel'},
+      {
+        text: '삭제',
+        onPress: () => {
+          setComments(prev => prev.filter(item => item.id !== comment.id));
+        },
+        style: 'destructive',
+      },
+    ]);
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container}>
-      {/* 게시글 정보 */}
-      <ScrollView style={styles.postContainer}>
-        <Text style={styles.postTitle}>{post.title}</Text>
-        <Text style={styles.postUser}>{post.user}</Text>
-        <Text style={styles.postDate}>{post.date}</Text>
-        <Text style={styles.postContent}>{post.description}</Text>
-        {post &&
-          post.uri.map((uri, index) => (
-            <Image key={index} source={{uri}} style={styles.postImage} />
-          ))}
-      </ScrollView>
-
-      {/* 댓글 목록 */}
       <FlatList
         data={filteredComments}
         renderItem={renderComment}
         keyExtractor={item => item.id}
+        ListHeaderComponent={renderPostHeader}
         contentContainerStyle={styles.commentList}
       />
       <View style={styles.commentInputContainer}>
@@ -128,7 +177,9 @@ const HelpRequestViewScreen = ({navigation}) => {
           value={newComment}
           onChangeText={setNewComment}
         />
-        <TouchableOpacity onPress={handleAddComment} style={styles.addButton}>
+        <TouchableOpacity
+          onPress={handleAddOrEditComment}
+          style={styles.addButton}>
           <Ionicons name="send" size={24} color="#014099" />
         </TouchableOpacity>
       </View>
@@ -158,11 +209,11 @@ const HelpRequestViewScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
+    paddingVertical: 16,
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
   postContainer: {
-    padding: 16,
     backgroundColor: 'white',
   },
   postTitle: {
@@ -196,8 +247,22 @@ const styles = StyleSheet.create({
   },
   commentContainer: {
     paddingVertical: 10,
+    paddingRight: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  commentsHeaderContainer: {
+    marginTop: height * 0.03,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    backgroundColor: 'white',
+  },
+  commentsHeaderText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    paddingHorizontal: 16,
   },
   commentUser: {
     fontSize: 14,
@@ -210,6 +275,10 @@ const styles = StyleSheet.create({
   commentDate: {
     fontSize: 12,
     color: 'gray',
+  },
+  commentActions: {
+    marginVertical: 5,
+    justifyContent: 'space-between',
   },
   commentInputContainer: {
     flexDirection: 'row',
@@ -250,6 +319,12 @@ const styles = StyleSheet.create({
   menuItem: {
     paddingVertical: 10,
     paddingHorizontal: 15,
+  },
+  deleteCommentButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'white',
   },
 });
 

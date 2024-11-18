@@ -181,7 +181,7 @@ const RankingStackNavigator = () => {
         name="RankingScreen"
         component={RankingScreen}
         options={{
-          title: '슈퍼눈떠봐',
+          title: '랭킹',
           headerLeft: HomeLeftHeader,
           headerRight: HomeRightHeader,
         }}
