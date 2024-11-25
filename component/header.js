@@ -41,7 +41,6 @@ export const HomeRightHeader = () => {
       <TouchableOpacity
         style={styles.homeRightHeaderStyle}
         onPress={() => {
-          console.log('Notifications pressed!');
           setMenuVisible(false);
           navigation.navigate('알림');
         }}>
@@ -56,16 +55,6 @@ export const HomeRightHeader = () => {
         <Ionicons name="person-circle-outline" size={24} color="#000" />
       </TouchableOpacity>
     </>
-  );
-};
-export const StudyingRightHeader = () => {
-  return (
-    <TouchableOpacity
-      style={styles.studyingRightHeaderStyle}
-      onPress={() => console.log('허용 앱 pressed!')}>
-      <Ionicons name="checkmark-circle-outline" size={24} color="#000" />
-      <Text>허용앱</Text>
-    </TouchableOpacity>
   );
 };
 export const ProfileRightHeader = () => {

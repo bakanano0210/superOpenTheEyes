@@ -15,7 +15,6 @@ const CommunityHomeScreen = () => {
   const navigation = useNavigation();
   const {initialIndex = 0} = communityRoute.params || {};
   const layout = useWindowDimensions();
-
   const [index, setIndex] = useState(initialIndex);
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);

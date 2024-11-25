@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {commonStyles} from '../public/styles';
+import {useMainContext} from './mainContext';
 
 const {width, height} = Dimensions.get('window');
 
@@ -24,6 +25,7 @@ export const SubjectModal = ({
   editingKey = null,
 }) => {
   const [subjectTitle, setSubjectTitle] = useState('');
+  const {token, realUrl} = useMainContext();
   useEffect(() => {
     if (visible) {
       setSubjectTitle(isEdit ? initialTitle : '');
@@ -33,7 +35,7 @@ export const SubjectModal = ({
   const onChangeTitle = title => {
     setSubjectTitle(title);
   };
-  const handleSave = () => {
+  const handleSave = async () => {
     if (subjectTitle.trim() === '') {
       Alert.alert('입력 오류', '과목명을 입력하세요.', [{text: '확인'}]);
       return;
@@ -45,20 +47,54 @@ export const SubjectModal = ({
       Alert.alert('중복 오류', '이미 존재하는 과목명입니다.', [{text: '확인'}]);
       return;
     }
-    if (isEdit) {
-      const updatedList = subjectCardInfoList.map(item =>
-        item.key === editingKey ? {...item, title: subjectTitle} : item,
-      );
-      setSubjectCardInfoList(updatedList);
-    } else {
-      const currentTime = Date.now().toString();
-      const key = `${subjectTitle}_${currentTime}`;
-      const newSubjectInfo = {
-        key: key,
-        title: subjectTitle,
-        time: '00:00:00',
-      };
-      setSubjectCardInfoList([...subjectCardInfoList, newSubjectInfo]);
+    try {
+      if (isEdit) {
+        const existingSubject = subjectCardInfoList.find(
+          item => item.id === editingKey,
+        );
+        // 서버에 과목 수정 요청
+        const response = await fetch(`${realUrl}/subjects/${editingKey}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: subjectTitle,
+            time: existingSubject.time,
+          }),
+        });
+        if (response.ok) {
+          const updatedSubject = await response.json();
+          setSubjectCardInfoList(prev =>
+            prev.map(item =>
+              item.id === editingKey
+                ? {...item, title: updatedSubject.title}
+                : item,
+            ),
+          );
+        } else {
+          console.error('Failed to update subject: ', await response.text());
+        }
+      } else {
+        // 서버에 과목 추가 요청
+        const response = await fetch(`${realUrl}/subjects`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({title: subjectTitle, time: 0}),
+        });
+        if (response.ok) {
+          const newSubject = await response.json();
+          setSubjectCardInfoList(prev => [...prev, newSubject]);
+        } else {
+          console.error('Failed to add subject: ', await response.text());
+        }
+      }
+    } catch (error) {
+      console.error('Error saving subject: ', error);
     }
     exit();
   };
@@ -157,6 +193,11 @@ export const calculateTotalTime = ({subjectCardInfoList}) => {
     return acc + hours * 3600 + minutes * 60 + seconds;
   }, 0);
   return formatTime(totalSeconds);
+};
+// HH:mm:ss 형식의 시간을 초 단위로 변환
+export const convertTimeToSeconds = timeString => {
+  const [hours, minutes, seconds] = timeString.split(':').map(Number);
+  return hours * 3600 + minutes * 60 + seconds;
 };
 
 const styles = StyleSheet.create({

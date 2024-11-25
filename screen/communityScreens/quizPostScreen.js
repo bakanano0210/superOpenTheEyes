@@ -1,9 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
-  Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
@@ -13,29 +11,48 @@ import {useMainContext} from '../../component/mainContext';
 import {CustomButton} from '../../component/custom';
 
 const QuizPostScreen = ({route}) => {
-  const {setQuizzes} = useMainContext();
+  const {setQuizzes, token, user, realUrl} = useMainContext();
   const navigation = useNavigation();
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!question || !answer) {
       Alert.alert('입력 오류', '문제와 정답을 모두 입력해주세요.');
       return;
     }
-    const newPost = {
-      id: Date.now().toString(), //나중에 userID 와 결합
+
+    const newQuiz = {
       question,
       answer,
       date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      user: 'User1', // 나중에 userID로 변경
+      userId: user.id,
+      userName: user.userName,
       likes: [],
       dislikes: [],
       userLiked: false,
       userDisliked: false,
     };
-    setQuizzes(prev => [newPost, ...prev]);
-    navigation.goBack();
+    try {
+      const response = await fetch(`${realUrl}/quizzes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newQuiz),
+      });
+
+      if (!response.ok) {
+        throw new Error('퀴즈 등록에 실패했습니다.');
+      }
+
+      const savedQuiz = await response.json();
+      setQuizzes(prev => [savedQuiz, ...prev]); // 반환된 퀴즈를 상태에 추가
+      navigation.goBack(); // 이전 화면으로 이동
+    } catch (error) {
+      Alert.alert('오류', error.message);
+    }
   };
 
   return (

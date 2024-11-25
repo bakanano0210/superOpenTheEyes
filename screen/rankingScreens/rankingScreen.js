@@ -7,7 +7,7 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {TabView} from 'react-native-tab-view';
 import {customRenderTabBar} from '../../component/header';
 import {formatTime} from '../../component/subject';
@@ -23,54 +23,62 @@ const formatDate = () => {
   });
 };
 
-const DailyRankingTap = ({currentUser}) => {
-  const {rankedDaily} = useMainContext();
+const DailyRankingTap = ({data}) => {
+  const {user, realUrl} = useMainContext();
   // 데이터 정렬 및 랭킹 추가
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
       <Text style={styles.rankText}>{item.rank}</Text>
       <Image
-        source={require('../../assets/exampleImg.png')}
+        source={
+          item.profileImageUri
+            ? {uri: `${realUrl}${item.profileImageUri}`}
+            : require('../../assets/exampleImg.png')
+        }
         resizeMode="contain"
         style={styles.profileImage}
       />
       <View style={styles.infoContainer}>
         <View style={[styles.nameAndTimeContainer, {paddingBottom: 20}]}>
-          <Text style={styles.nameText}>{item.name}</Text>
-          <Text style={styles.timeText}>{item.time}</Text>
+          <Text style={styles.nameText}>{item.userName}</Text>
+          <Text style={styles.timeText}>{formatTime(item.studyTime)}</Text>
         </View>
-        <Text style={styles.groupText}>{item.studyGroup}</Text>
+        <Text style={styles.groupText}>{item.studyGroupName}</Text>
       </View>
     </View>
   );
   return (
     <View style={styles.container}>
       <Text style={styles.dateText}>{formatDate()}</Text>
-      <Text style={styles.timerText}>{currentUser.studyTime}</Text>
+      <Text style={styles.timerText}>{formatTime(user.studyTime)}</Text>
 
       <FlatList
-        data={rankedDaily}
+        data={data}
         renderItem={renderItem}
-        keyExtractor={item => item.rank.toString()}
+        keyExtractor={item => item.userName}
         contentContainerStyle={styles.listContent}
       />
     </View>
   );
 };
-const GroupRankingTap = ({currentUser}) => {
-  const {rankedGroup} = useMainContext();
+const GroupRankingTap = ({data}) => {
+  const {user, realUrl} = useMainContext();
   // 그룹별로 데이터를 분류하고 시간 총합 계산
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
       <Text style={styles.rankText}>{item.rank}</Text>
       <Image
-        source={require('../../assets/exampleImg.png')}
+        source={
+          item.imageUri
+            ? {uri: `${realUrl}${item.imageUri}`}
+            : require('../../assets/exampleImg.png')
+        }
         resizeMode="contain"
         style={styles.profileImage}
       />
       <View style={styles.infoContainer}>
         <View style={styles.nameAndTimeContainer}>
-          <Text style={styles.nameText}>{item.studyGroup}</Text>
+          <Text style={styles.nameText}>{item.studyGroupName}</Text>
           <Text style={styles.timeText}>{formatTime(item.totalTime)}</Text>
         </View>
         <Text style={styles.groupText}>
@@ -83,34 +91,38 @@ const GroupRankingTap = ({currentUser}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.dateText}>{formatDate()}</Text>
-      <Text style={styles.timerText}>{currentUser.studyTime}</Text>
+      <Text style={styles.timerText}>{formatTime(user.studyTime)}</Text>
 
       <FlatList
-        data={rankedGroup}
+        data={data}
         renderItem={renderItem}
-        keyExtractor={item => item.rank.toString()}
+        keyExtractor={item => item.studyGroupName}
         contentContainerStyle={styles.listContent}
       />
     </View>
   );
 };
-const RankingInGroupTap = ({currentUser}) => {
-  const {rankedInGroup} = useMainContext();
+const RankingInGroupTap = ({data}) => {
+  const {user, realUrl} = useMainContext();
 
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
       <Text style={styles.rankText}>{item.rank}</Text>
       <Image
-        source={require('../../assets/exampleImg.png')}
+        source={
+          item.profileImageUri
+            ? {uri: `${realUrl}${item.profileImageUri}`}
+            : require('../../assets/exampleImg.png')
+        }
         resizeMode="contain"
         style={styles.profileImage}
       />
       <View style={styles.infoContainer}>
         <View style={[styles.nameAndTimeContainer, {paddingBottom: 20}]}>
-          <Text style={styles.nameText}>{item.name}</Text>
-          <Text style={styles.timeText}>{item.time}</Text>
+          <Text style={styles.nameText}>{item.userName}</Text>
+          <Text style={styles.timeText}>{formatTime(item.studyTime)}</Text>
         </View>
-        <Text style={styles.groupText}>{item.studyGroup}</Text>
+        <Text style={styles.groupText}>{item.studyGroupName}</Text>
       </View>
     </View>
   );
@@ -118,18 +130,19 @@ const RankingInGroupTap = ({currentUser}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.dateText}>{formatDate()}</Text>
-      <Text style={styles.timerText}>{currentUser.studyTime}</Text>
+      <Text style={styles.timerText}>{formatTime(user.studyTime)}</Text>
 
       <FlatList
-        data={rankedInGroup}
+        data={data}
         renderItem={renderItem}
-        keyExtractor={item => item.key.toString()}
+        keyExtractor={item => item.userName}
         contentContainerStyle={styles.listContent}
       />
     </View>
   );
 };
 const RankingScreen = () => {
+  const {rankedDaily, rankedGroup, rankedInGroup} = useMainContext();
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [routes] = useState([
@@ -137,16 +150,16 @@ const RankingScreen = () => {
     {key: 'second', title: '그룹 랭킹'},
     {key: 'third', title: '그룹 내 랭킹'},
   ]);
-  const {user} = useMainContext();
+
   const renderScene = ({route}) => {
     switch (route.key) {
       case 'first':
-        return <DailyRankingTap currentUser={user} />;
+        return <DailyRankingTap data={rankedDaily} />;
 
       case 'second':
-        return <GroupRankingTap currentUser={user} />;
+        return <GroupRankingTap data={rankedGroup} />;
       case 'third':
-        return <RankingInGroupTap currentUser={user} />;
+        return <RankingInGroupTap data={rankedInGroup} />;
       default:
         return null;
     }
@@ -229,6 +242,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'right',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 export default RankingScreen;

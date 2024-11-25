@@ -16,6 +16,7 @@ import {
   CustomLoginInput,
   handleNavigate,
 } from '../component/custom';
+import {useMainContext} from '../component/mainContext';
 
 const {width, height} = Dimensions.get('window');
 
@@ -24,7 +25,18 @@ const LoginScreen = ({navigation}) => {
   const [loginPassword, setLoginPassword] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
-
+  const {
+    user,
+    setUser,
+    token,
+    setToken,
+    fetchStudyGroups,
+    fetchHelpRequests,
+    fetchQuizzes,
+    fetchRankingData,
+    realUrl,
+    studyGroups,
+  } = useMainContext();
   // 로그인 화면에 올 때마다 이메일과 비밀번호 초기화
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -34,12 +46,23 @@ const LoginScreen = ({navigation}) => {
     return unsubscribe;
   }, [navigation]);
 
+  useEffect(() => {
+    fetchStudyGroups();
+    fetchHelpRequests();
+    fetchQuizzes();
+  }, [user, token]);
+
+  useEffect(() => {
+    fetchRankingData();
+  }, [user]);
+
+
   const checkLoginStatus = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       const remember = await AsyncStorage.getItem('rememberMe'); // "로그인 유지" 상태 확인
       if (token && remember === 'true') {
-        const response = await fetch('http://10.0.2.2:8082/users/validate', {
+        const response = await fetch(`${realUrl}/users/validate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -48,6 +71,11 @@ const LoginScreen = ({navigation}) => {
         });
 
         if (response.ok) {
+          setToken(token);
+          const user = await response.json();
+          console.log('user'); // 사용자 정보 파싱
+          console.log(user);
+          setUser(user);
           handleNavigate({navigation}, 'MainApp');
         } else {
           console.log(response);
@@ -68,10 +96,9 @@ const LoginScreen = ({navigation}) => {
   }, [checkLoginStatus]);
 
   const login = async (userEmail, password) => {
+    console.log('loginTocuhed!');
     try {
-      console.log(userEmail);
-      console.log(password);
-      const response = await fetch('http://10.0.2.2:8082/users/login', {
+      const response = await fetch(`http://192.168.200.195:8082/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,14 +110,17 @@ const LoginScreen = ({navigation}) => {
       });
 
       if (response.ok) {
-        const token = await response.text(); // 서버에서 받은 JWT 토큰
+        const {token, user} = await response.json();
         await AsyncStorage.setItem('token', token);
+        setToken(token);
         if (rememberMe) {
           // "로그인 유지" 체크 시 별도 플래그 저장
           await AsyncStorage.setItem('rememberMe', 'true');
         } else {
           await AsyncStorage.removeItem('rememberMe');
         }
+        setUser(user);
+        console.log(user);
         console.log('Login successful!');
         handleNavigate({navigation}, 'MainApp');
       } else {

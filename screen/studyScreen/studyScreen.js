@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import {Camera, useCameraDevice} from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {formatTime} from '../component/subject';
+import {formatTime} from '../../component/subject';
 
 const {width, height} = Dimensions.get('window');
 
@@ -53,7 +53,11 @@ const StudyScreen = ({route, navigation}) => {
   }, [hasPermission, device]);
   const handlePause = () => {
     clearInterval(intervalRef.current);
-    navigation.navigate('HomeScreen', {elapsedTime, key: subject.key});
+    console.log(`Paused study. Elapsed time: ${elapsedTime}`);
+    navigation.navigate('HomeScreen', {elapsedTime, id: subject.id});
+  };
+  const handleStudyGroupNavigation = () => {
+    navigation.navigate('GroupStudying'); // 스터디 그룹 화면으로 이동
   };
 
   // 장치가 없거나 권한이 없을 때 로딩 표시
@@ -90,6 +94,13 @@ const StudyScreen = ({route, navigation}) => {
           />
         </TouchableOpacity>
       </View>
+      {/* <View style={studyingStyles.buttonContainer}>
+        <TouchableOpacity
+          style={studyingStyles.studyGroupButton}
+          onPress={handleStudyGroupNavigation}>
+          <Text style={studyingStyles.studyGroupButtonText}>스터디 그룹</Text>
+        </TouchableOpacity>
+      </View> */}
     </View>
   );
 };
@@ -121,6 +132,21 @@ const studyingStyles = StyleSheet.create({
     marginBottom: 10,
   },
   iconSize: width * 0.3,
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  studyGroupButton: {
+    backgroundColor: '#014099',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  studyGroupButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   // 집중 화면 스타일
 });
 

@@ -16,7 +16,7 @@ import {CustomButton} from '../../component/custom';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const HelpRequestPostScreen = ({navigation}) => {
-  const {setHelpRequests, user, helpRequests} = useMainContext();
+  const {setHelpRequests, user, token, realUrl} = useMainContext();
   const route = useRoute();
   const {post} = route.params || {};
   const [title, setTitle] = useState();
@@ -45,7 +45,7 @@ const HelpRequestPostScreen = ({navigation}) => {
       },
     );
   };
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title || !description) {
       Alert.alert('입력 오류', '제목과 내용을 모두 입력해주세요.');
       return;
@@ -57,26 +57,67 @@ const HelpRequestPostScreen = ({navigation}) => {
         description,
         uri: imageUris,
       };
-      setHelpRequests(prev =>
-        prev.map(item => (item.id === post.id ? updatedPost : item)),
-      );
-      navigation.navigate('HelpRequestView', {post: updatedPost});
+      try {
+        const response = await fetch(
+          `${realUrl}/help-requests/${post.id}?userId=${user.id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(updatedPost),
+          },
+        );
+        if (!response.ok) {
+          throw new Error('요청 처리 실패');
+        }
+
+        const savedPost = await response.json();
+
+        setHelpRequests(prev =>
+          prev.map(item => (item.id === post.id ? updatedPost : item)),
+        );
+        navigation.navigate('HelpRequestView', {post: updatedPost});
+      } catch (error) {
+        console.error(error);
+        Alert.alert('오류', error.message);
+      }
     } else {
       const newPost = {
-        id: Date.now().toString(), //나중에 userID 와 결합
         title,
         description,
         date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        user: user.name, // 나중에 userID로 변경
+        user: user.name,
         userId: user.id,
         comments: 0,
         uri: imageUris,
       };
-      setHelpRequests(prev => [newPost, ...prev]);
-      navigation.goBack();
+      try {
+        const response = await fetch(
+          `${realUrl}/help-requests?userId=${user.id}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(newPost),
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('게시물 저장 실패');
+        }
+
+        const savedPost = await response.json();
+        setHelpRequests(prev => [savedPost, ...prev]);
+        navigation.goBack();
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      }
     }
   };
-  console.log(helpRequests);
   const handleDeleteImage = uri => {
     setImageUris(prevUris => prevUris.filter(item => item !== uri)); // 선택한 이미지 URI 삭제
   };

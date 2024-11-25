@@ -16,98 +16,174 @@ const {width} = Dimensions.get('window');
 
 const calculateMemberTotalTime = ({members}) => {
   const totalSeconds = members.reduce((acc, item) => {
-    const [hours, minutes, seconds] = item.studyTime.split(':').map(Number);
-    return acc + hours * 3600 + minutes * 60 + seconds;
+    return acc + item.studyTime;
   }, 0);
   return formatTime(totalSeconds);
 };
 const ItemSeparator = () => <View style={styles.itemSeparator} />;
+
 const StudyGroupDetailScreen = ({navigation}) => {
   // 멤버 정보 렌더링 함수
   const route = useRoute();
   const {info} = route.params;
-  const [totalTime, setTotalTime] = useState('00:00:00');
-  const {user, users, setUsers, studyGroups, setStudyGroups} = useMainContext();
-  const [members, setMembers] = useState([
-    // 임시 멤버. user 테이블을 이용해서 초기화할 예정
-    // {id: '1', name: 'HDH', studyTime: '04:35:21'},
-    // {id: '2', name: 'PSU', studyTime: '03:22:15'},
-    // {id: '3', name: 'ESH', studyTime: '02:05:04'},
-  ]);
+  const [totalTime, setTotalTime] = useState(0);
+  const {
+    user,
+    setUser,
+    studyGroups,
+    setStudyGroups,
+    token,
+    realUrl,
+    rankedGroup,
+  } = useMainContext();
+  const [members, setMembers] = useState([]);
   const [groupInfo, setGroupInfo] = useState(info);
-  useEffect(() => {
-    const filteredMembers = users
-      .filter(u => u.studyGroupId === info.id)
-      .sort((a, b) => {
-        const [aHours, aMinutes, aSeconds] = a.studyTime.split(':').map(Number);
-        const [bHours, bMinutes, bSeconds] = b.studyTime.split(':').map(Number);
-        const aTotalSeconds = aHours * 3600 + aMinutes * 60 + aSeconds;
-        const bTotalSeconds = bHours * 3600 + bMinutes * 60 + bSeconds;
-        return bTotalSeconds - aTotalSeconds; // 내림차순 정렬
-      });
-    setMembers(filteredMembers);
-  }, [users, info]);
-
+  const GroupRank =
+    rankedGroup?.find(item => item.studyGroupId === user.studyGroupId) || null;
   useEffect(() => {
     navigation.setOptions({
       title: info.name,
     });
   }, [navigation, info]);
+  // 그룹 멤버 가져오기
+  useEffect(() => {
+    const fetchGroupMembers = async () => {
+      try {
+        const response = await fetch(
+          `${realUrl}/study-groups/${info.id}/members`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setMembers(data); // 멤버 데이터 업데이트
+        } else {
+          console.error('Failed to fetch members:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error fetching members:', error);
+      }
+    };
+
+    fetchGroupMembers();
+  }, [info.id, token]);
+
+  // 멤버 데이터 변경 시 총 스터디 시간 업데이트
   useEffect(() => {
     setTotalTime(calculateMemberTotalTime({members}));
   }, [members]);
+
+  // 스터디 그룹 정보 업데이트
   useEffect(() => {
     const updatedGroup = studyGroups.find(group => group.id === info.id);
     if (updatedGroup) {
       setGroupInfo(updatedGroup); // 업데이트된 데이터를 groupInfo에 반영
     }
   }, [studyGroups, info.id]);
+
   const renderMember = ({item}) => (
     <View style={styles.memberContainer}>
       <Image
         source={
-          item.profileImageUri === ''
-            ? require('../../assets/exampleImg.png')
-            : {uri: item.profileImageUri}
+          item.profileImageUri
+            ? {uri: `${realUrl}${item.profileImageUri}`}
+            : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"
         style={styles.groupIcon}
       />
-      <Text style={styles.memberName}>{item.name}</Text>
-      <Text style={styles.memberTime}>{item.studyTime}</Text>
+      <Text style={styles.memberName}>{item.userName}</Text>
+      <Text style={styles.memberTime}>{formatTime(item.studyTime)}</Text>
     </View>
   );
-  const handleLeaveGroup = () => {
-    const updatedUser = {...user, studyGroupId: 0};
-    setUsers(prevUsers =>
-      prevUsers.map(u => (u.id === updatedUser.id ? updatedUser : u)),
-    );
-    setStudyGroups(prevGroups =>
-      prevGroups.map(group =>
-        group.id === info.id ? {...group, members: group.members - 1} : group,
-      ),
-    );
-  };
-  const handleJoinGroup = () => {
-    if (groupInfo.members + 1 <= groupInfo.limit) {
-      const updatedUser = {...user, studyGroupId: info.id};
-      setUsers(prevUsers =>
-        prevUsers.map(u => (u.id === updatedUser.id ? updatedUser : u)),
-      );
+  // 그룹 탈퇴 처리
+  const handleLeaveGroup = async () => {
+    try {
+      const response = await fetch(`${realUrl}/study-groups/${info.id}/leave`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      setStudyGroups(prevGroups =>
-        prevGroups.map(group =>
-          group.id === info.id ? {...group, members: group.members + 1} : group,
-        ),
-      );
-    } else {
-      Alert.alert('가입 불가', '인원이 가득차서 가입할 수 없습니다.');
-      return; // 그룹 가입 중지
+      if (response.ok) {
+        const message = await response.text();
+        if (message.includes('Group deleted')) {
+          // 그룹 삭제 처리
+          setStudyGroups(prevGroups =>
+            prevGroups.filter(group => group.id !== info.id),
+          );
+        } else {
+          // 그룹 탈퇴 처리
+          setStudyGroups(prevGroups =>
+            prevGroups.map(group =>
+              group.id === info.id
+                ? {...group, membersCount: group.membersCount - 1}
+                : group,
+            ),
+          );
+        }
+        setUser(prevUser => ({...prevUser, studyGroupId: null}));
+        Alert.alert('탈퇴 완료', message);
+        navigation.goBack();
+      } else {
+        console.error('Failed to leave group:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error leaving group:', error);
+    }
+  };
+  // 그룹 가입 처리
+  const handleJoinGroup = async () => {
+    if (groupInfo.membersCount >= groupInfo.limit) {
+      Alert.alert('가입 불가', '그룹 인원이 가득 찼습니다.');
+      return;
+    }
+    if (user.studyGroupId !== null) {
+      Alert.alert('가입 불가', '이미 가입한 그룹이 있습니다.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${realUrl}/study-groups/${info.id}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        console.log('updatedUser');
+        console.log(updatedUser);
+        setUser(updatedUser); // 사용자 정보 업데이트
+        setStudyGroups(prevGroups =>
+          prevGroups.map(group =>
+            group.id === info.id
+              ? {...group, membersCount: group.membersCount + 1}
+              : group,
+          ),
+        );
+        setMembers(prevMembers => [...prevMembers, user]);
+        Alert.alert('가입 완료', '스터디 그룹에 가입했습니다.');
+        navigation.goBack();
+      } else {
+        console.error('Failed to join group:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error joining group:', error);
     }
   };
   // 조건에 따른 버튼 렌더링
   const renderActionButton = () => {
-    if (groupInfo.leaderId === user.id) {
+    if (groupInfo.leaderName === user.userName) {
       return null; // 리더인 경우 버튼 없음
     } else if (user.studyGroupId === groupInfo.id) {
       return (
@@ -123,16 +199,17 @@ const StudyGroupDetailScreen = ({navigation}) => {
       );
     }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
         <View style={styles.groupInfo}>
           <Text style={styles.groupDescription}>{groupInfo.description}</Text>
           <Text style={styles.groupDetail}>
-            총인원 : {groupInfo.members}/{groupInfo.limit}
+            총인원 : {groupInfo.membersCount}/{groupInfo.limit}
           </Text>
-          <Text style={styles.groupDetail}>스터디 그룹 랭킹 2위</Text>
+          <Text style={styles.groupDetail}>
+            스터디 그룹 랭킹 {GroupRank?.rank || 0}위
+          </Text>
         </View>
         <Text style={styles.timer}>{totalTime}</Text>
         {/* 멤버 리스트 */}

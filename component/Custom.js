@@ -54,10 +54,6 @@ export const CustomMenu = () => {
         onPress={() => handleNavigate('HomeStack')}
       />
       <CustomMenuButton
-        title="허용앱"
-        onPress={() => handleNavigate('허용앱')}
-      />
-      <CustomMenuButton
         title="스터디 그룹"
         onPress={() => handleNavigate('Community', 0)}
       />

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {CustomButton, CustomLoginInput} from '../component/custom';
 import {commonStyles} from '../public/styles';
+import {useMainContext} from '../component/mainContext';
 
 const {width, height} = Dimensions.get('window');
 
@@ -19,6 +20,7 @@ const RegistrationScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
+  const {realUrl} = useMainContext();
 
   // 이메일로 인증번호 전송 요청
   const handleSendVerificationCode = async () => {
@@ -28,16 +30,13 @@ const RegistrationScreen = ({navigation}) => {
       return;
     }
     try {
-      const response = await fetch(
-        'http://10.0.2.2:8082/users/send-verification-code',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({email}),
+      const response = await fetch(`${realUrl}/users/send-verification-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({email}),
+      });
 
       if (response.ok) {
         setIsCodeSent(true);
@@ -63,7 +62,7 @@ const RegistrationScreen = ({navigation}) => {
     }
     try {
       const response = await fetch(
-        `http://10.0.2.2:8082/users/verify-code-register?verificationCode=${verificationCode}`,
+        `${realUrl}/users/verify-code-register?verificationCode=${verificationCode}`,
         {
           method: 'POST',
           headers: {

@@ -6,8 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screen/homeScreens/homeScreen';
 import CommunityHomeScreen from '../screen/communityScreens/communityHomeScreen';
 import RankingScreen from '../screen/rankingScreens/rankingScreen';
-import StudyScreen from '../screen/studyScreen';
-import AddAllowedAppScreen from '../screen/addAllowedAppScreen';
+import StudyScreen from '../screen/studyScreen/studyScreen';
 import ProfileScreen from '../screen/profileScreen';
 import NotificationScreen from '../screen/notificationScreens/notificationScreen';
 import HelpRequestViewScreen from '../screen/communityScreens/helpRequestViewScreen';
@@ -16,13 +15,17 @@ import {
   HomeLeftHeader,
   HomeRightHeader,
   ProfileRightHeader,
-  StudyingRightHeader,
 } from './header';
 import {CustomMenu} from './custom';
 import {useMainContext} from './mainContext';
 import StudyGroupDetailScreen from '../screen/communityScreens/studyGroupDetailScreen';
 import HelpRequestPostScreen from '../screen/communityScreens/helpRequestPostScreen';
 import QuizPostScreen from '../screen/communityScreens/quizPostScreen';
+import NotificationDetailScreen from '../screen/notificationScreens/notificationDetailScreen';
+import MessageWriteScreen from '../screen/notificationScreens/messageWriteScreen';
+import ChatListScreen from '../screen/notificationScreens/chatListScreen';
+import ChatRoomScreen from '../screen/notificationScreens/chatRoomScreen';
+import StudyGroupScreen from '../screen/studyScreen/studyGroupScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -104,17 +107,24 @@ export const MainStackNavigator = () => {
           component={StudyScreen}
           options={{
             title: '학습 중',
-            headerRight: StudyingRightHeader,
             headerLeft: EmptyLeftHeader,
           }}
         />
-        <Stack.Screen name="허용앱" component={AddAllowedAppScreen} />
+        <Stack.Screen
+          name="GroupStudying"
+          component={StudyGroupScreen}
+          options={{title: '학습 중'}}
+        />
         <Stack.Screen
           name="프로필"
           component={ProfileScreen}
           options={{headerRight: ProfileRightHeader}}
         />
-        <Stack.Screen name="알림" component={NotificationScreen} />
+        <Stack.Screen
+          name="알림"
+          component={NotificationStackNavigator}
+          options={{headerShown: false}}
+        />
       </Stack.Navigator>
       <CustomMenu />
     </>
@@ -185,6 +195,43 @@ const RankingStackNavigator = () => {
           headerLeft: HomeLeftHeader,
           headerRight: HomeRightHeader,
         }}
+      />
+    </Stack.Navigator>
+  );
+};
+const NotificationStackNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: 'center',
+        headerStyle: {backgroundColor: '#fdf7ff'},
+        headerTintColor: '#000',
+        headerTitleStyle: {fontWeight: 'bold'},
+      }}>
+      <Stack.Screen
+        name="NotificationScreen"
+        component={NotificationScreen}
+        options={{title: '알림'}}
+      />
+      <Stack.Screen
+        name="NotificationDetail"
+        component={NotificationDetailScreen}
+        options={{title: '알림'}}
+      />
+      <Stack.Screen
+        name="MessageWrite"
+        component={MessageWriteScreen}
+        options={{title: '쪽지 쓰기'}}
+      />
+      <Stack.Screen
+        name="ChatList"
+        component={ChatListScreen}
+        options={{title: '멘토링 채팅'}}
+      />
+      <Stack.Screen
+        name="ChatRoom"
+        component={ChatRoomScreen}
+        options={{title: 'User 님과의 멘토링'}}
       />
     </Stack.Navigator>
   );

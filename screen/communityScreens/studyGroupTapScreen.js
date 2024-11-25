@@ -11,15 +11,11 @@ import {
   ScrollView,
   Image,
   StyleSheet,
-  Dimensions,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {CustomButton} from '../../component/custom';
 import {useMainContext} from '../../component/mainContext';
 import {launchImageLibrary} from 'react-native-image-picker';
-
-const {width, height} = Dimensions.get('window');
-const tempUserId = '1';
 
 const StudyGroupTap = ({
   modalVisible,
@@ -28,7 +24,7 @@ const StudyGroupTap = ({
   setIsEditMode,
   navigation,
 }) => {
-  const {studyGroups, setStudyGroups} = useMainContext();
+  const {token, realUrl} = useMainContext();
   const [selectedGroup, setSelectedGroup] = useState({
     id: '',
     leaderId: '',
@@ -36,15 +32,14 @@ const StudyGroupTap = ({
     members: '',
     leaderName: '',
   });
-
+  const {studyGroups, setStudyGroups} = useMainContext();
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupLimit, setNewGroupLimit] = useState(1);
   const [newGroupDescription, setNewGroupDescription] = useState('');
-  const leaderName = '로그인아이디';
   const [imageUri, setImageUri] = useState('');
   const [searchText, setSearchText] = useState('');
   const [filteredGroups, setFilteredGroups] = useState(studyGroups);
-  const {user, setUsers} = useMainContext();
+  const {user, setUser} = useMainContext();
 
   const handleChoosePhoto = () => {
     launchImageLibrary(
@@ -52,71 +47,199 @@ const StudyGroupTap = ({
         mediaType: 'photo',
         includeBase64: false,
       },
-      response => {
+      async response => {
         if (response.didCancel) {
           console.log('사용자 취소');
         } else if (response.errorMessage) {
           console.log('ImagePicker Error: ', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
-          setImageUri(response.assets[0].uri);
+          const selectedUri = response.assets[0].uri;
+          setImageUri(selectedUri);
         }
       },
     );
   };
+  const uploadGroupImage = async (groupId, selectedUri) => {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: selectedUri,
+      type: 'image/jpeg',
+      name: 'groupImage.jpg',
+    });
+
+    try {
+      const uploadResponse = await fetch(
+        `${realUrl}/study-groups/${groupId}/upload-group-image`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (uploadResponse.ok) {
+        const {imageUri} = await uploadResponse.json();
+
+        // 그룹 이미지 업데이트
+        setStudyGroups(prevGroups =>
+          prevGroups.map(group =>
+            group.id === groupId ? {...group, imageUri} : group,
+          ),
+        );
+
+        console.log('Group image uploaded successfully:', imageUri);
+      } else {
+        console.error(
+          'Failed to upload group image:',
+          await uploadResponse.text(),
+        );
+      }
+    } catch (error) {
+      console.error('Error uploading group image:', error);
+    }
+  };
+
   const handleDelete = id => {
     Alert.alert('삭제 확인', '이 항목을 삭제하시겠습니까?', [
       {text: '취소', style: 'cancel'},
       {
         text: '삭제',
-        onPress: () => {
-          const updatedData = studyGroups.filter(item => item.id !== id);
-          setStudyGroups(updatedData);
-          setSelectedGroup(null);
+        onPress: async () => {
+          try {
+            const response = await fetch(`${realUrl}/study-groups/${id}`, {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            if (response.ok) {
+              // 서버에서 성공적으로 삭제된 경우 로컬 상태 업데이트
+              setStudyGroups(prevGroups =>
+                prevGroups.filter(group => group.id !== id),
+              );
+
+              // 사용자 상태에서 studyGroupId 초기화
+              setUser(prevUser => ({
+                ...prevUser,
+                studyGroupId: null, // studyGroupId를 null로 초기화
+              }));
+
+              Alert.alert('삭제 완료', '그룹이 삭제되었습니다.');
+            } else {
+              console.error('Failed to delete group:', await response.text());
+              Alert.alert('삭제 실패', '그룹 삭제에 실패했습니다.');
+            }
+          } catch (error) {
+            console.error('Error deleting group:', error);
+            Alert.alert('삭제 오류', '서버와의 통신 중 오류가 발생했습니다.');
+          }
         },
         style: 'destructive',
       },
     ]);
   };
 
-  const handleSaveGroup = () => {
+  const handleSaveGroup = async () => {
     if (isEditMode) {
-      const updatedGroups = studyGroups.map(group =>
-        group.id === selectedGroup.id
-          ? {
-              ...selectedGroup,
-              name: newGroupName,
-              description: newGroupDescription,
-              limit: newGroupLimit,
-              imageUri: imageUri,
-            }
-          : group,
-      );
-      setStudyGroups(updatedGroups);
+      // 수정 모드
+      const updatedGroup = {
+        ...selectedGroup,
+        name: newGroupName,
+        description: newGroupDescription,
+        limit: newGroupLimit,
+      };
+      try {
+        const response = await fetch(
+          `${realUrl}/study-groups/${selectedGroup.id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(updatedGroup),
+          },
+        );
+
+        if (response.ok) {
+          const updatedGroupResponse = await response.json();
+          // 로컬 상태 업데이트
+          setStudyGroups(prev =>
+            prev.map(group =>
+              group.id === updatedGroupResponse.id
+                ? updatedGroupResponse
+                : group,
+            ),
+          );
+          // 이미지 업로드
+          if (imageUri) {
+            await uploadGroupImage(updatedGroupResponse.id, imageUri);
+          }
+
+          // 사용자 정보 업데이트
+          if (updatedGroupResponse.leaderId === user.id) {
+            setUser(prevUser => ({
+              ...prevUser,
+              studyGroupId: updatedGroupResponse.id,
+            }));
+          }
+          Alert.alert('수정 완료', '그룹 정보가 수정되었습니다.');
+        } else {
+          console.error('Failed to update group:', await response.text());
+          Alert.alert('수정 실패', '그룹 정보 수정에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('Error updating group:', error);
+        Alert.alert('수정 오류', '그룹 정보 수정 중 오류가 발생했습니다.');
+      }
     } else {
+      // 생성 모드
       // user의 studyGroupId가 0이 아니면 이미 가입한 그룹이 있는 것으로 간주
-      if (user.studyGroupId !== 0) {
+      if (user.studyGroupId !== null) {
         Alert.alert('생성 불가', '이미 가입된 스터디 그룹이 있습니다.');
         return; // 그룹 생성 프로세스 중지
       }
-      const currentTime = Date.now().toString();
-      const newGroupId = `${leaderName}-${currentTime}`;
-      const newGroup = {
-        id: newGroupId,
-        leaderId: user.id,
+      const group = {
         name: newGroupName,
-        members: 1,
-        leaderName: user.name,
         description: newGroupDescription,
         limit: newGroupLimit,
-        imageUri: imageUri,
       };
-      setStudyGroups([newGroup, ...studyGroups]);
+      try {
+        const response = await fetch(`${realUrl}/study-groups`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(group),
+        });
 
-      setUsers(prevUsers =>
-        prevUsers.map(u =>
-          u.id === user.id ? {...u, studyGroupId: newGroupId} : u,
-        ),
-      );
+        if (response.ok) {
+          const newGroup = await response.json();
+          // 로컬 상태에 새로운 그룹 추가
+          setStudyGroups(prev => [newGroup, ...prev]);
+          // 이미지 업로드
+          if (imageUri) {
+            await uploadGroupImage(newGroup.id, imageUri);
+          }
+          // 사용자 정보 업데이트 (생성 후 그룹 리더가 되므로 그룹 정보 설정)
+          setUser(prevUser => ({
+            ...prevUser,
+            studyGroupId: newGroup.id,
+            studyGroupName: newGroup.name,
+          }));
+          Alert.alert('생성 완료', '새로운 그룹이 생성되었습니다.');
+        } else {
+          console.error('Failed to create group:', await response.text());
+          Alert.alert('생성 실패', '그룹 생성에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('Error creating group:', error);
+        Alert.alert('생성 오류', '그룹 생성 중 오류가 발생했습니다.');
+      }
     }
     handleCancle();
   };
@@ -137,56 +260,58 @@ const StudyGroupTap = ({
     setFilteredGroups(filtered);
   }, [studyGroups, searchText]);
 
-  const renderItem = ({item}) => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('StudyGroupDetail', {info: item})}>
-      <View style={styles.groupContainer}>
-        <View style={styles.iconPlaceholder}>
-          <Image
-            source={
-              item.imageUri === ''
-                ? require('../../assets/exampleImg.png')
-                : {uri: item.imageUri}
-            }
-            resizeMode="contain"
-            style={styles.groupIcon}
-          />
-        </View>
-        <View style={styles.groupInfo}>
-          <View style={styles.groupHeader}>
-            <Text style={styles.groupName}>{item.name}</Text>
-            {item.leaderId === tempUserId && (
-              <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                <Ionicons name="close" size={24} color="black" />
-              </TouchableOpacity>
-            )}
+  const renderItem = ({item}) => {
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('StudyGroupDetail', {info: item})}>
+        <View style={styles.groupContainer}>
+          <View style={styles.iconPlaceholder}>
+            <Image
+              source={
+                item.imageUri
+                  ? {uri: `${realUrl}${item.imageUri}`}
+                  : require('../../assets/exampleImg.png')
+              }
+              resizeMode="contain"
+              style={styles.groupIcon}
+            />
           </View>
-          <View style={styles.groupDetailsContainer}>
-            <View>
-              <Text style={styles.groupDetails}>
-                {item.members}/{item.limit}
-              </Text>
-              <Text style={styles.groupDetails}>{item.leaderName}</Text>
+          <View style={styles.groupInfo}>
+            <View style={styles.groupHeader}>
+              <Text style={styles.groupName}>{item.name}</Text>
+              {item.leaderId === user.id && (
+                <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                  <Ionicons name="close" size={24} color="black" />
+                </TouchableOpacity>
+              )}
             </View>
-            {item.leaderId === tempUserId && (
-              <TouchableOpacity
-                onPress={() => {
-                  setIsEditMode(true);
-                  setModalVisible(true);
-                  setSelectedGroup(item);
-                  setNewGroupName(item.name);
-                  setNewGroupLimit(item.limit);
-                  setNewGroupDescription(item.description);
-                  setImageUri(item.imageUri);
-                }}>
-                <Ionicons name="pencil" size={24} color="black" />
-              </TouchableOpacity>
-            )}
+            <View style={styles.groupDetailsContainer}>
+              <View>
+                <Text style={styles.groupDetails}>
+                  {item.membersCount}/{item.limit}
+                </Text>
+                <Text style={styles.groupDetails}>{item.leaderName}</Text>
+              </View>
+              {item.leaderId === user.id && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsEditMode(true);
+                    setModalVisible(true);
+                    setSelectedGroup(item);
+                    setNewGroupName(item.name);
+                    setNewGroupLimit(item.limit);
+                    setNewGroupDescription(item.description);
+                    setImageUri(item.imageUri);
+                  }}>
+                  <Ionicons name="pencil" size={24} color="black" />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
   return (
     <View style={styles.communityContainer}>
       <Modal
@@ -313,8 +438,8 @@ const styles = StyleSheet.create({
   },
   label: {fontSize: 14, color: '#444', marginBottom: 5},
   iconPlaceholder: {
-    width: 72,
-    height: 72,
+    width: 64,
+    height: 64,
     backgroundColor: '#fff',
     borderRadius: 25,
     alignItems: 'center',
@@ -334,8 +459,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   groupIcon: {
-    width: 64,
-    height: 64,
+    width: 48,
+    height: 48,
   },
   groupInfo: {
     flex: 1,

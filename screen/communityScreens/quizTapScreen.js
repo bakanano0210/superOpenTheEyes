@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMainContext} from '../../component/mainContext';
@@ -13,9 +14,15 @@ import {useMainContext} from '../../component/mainContext';
 const {width, height} = Dimensions.get('window');
 
 const QuizTap = () => {
-  const {quizzes, setQuizzes, user} = useMainContext();
+  const {quizzes, setQuizzes, user, token, realUrl} = useMainContext();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleLike = id => {
+    if (isUpdating) {
+      // 서버 업데이트 중엔 차단
+      return;
+    }
+
     setQuizzes(prevQuizzes =>
       prevQuizzes.map(quiz => {
         if (quiz.id === id) {
@@ -23,7 +30,11 @@ const QuizTap = () => {
           const updatedLikes = hasLiked
             ? quiz.likes.filter(uid => uid !== user.id) // 좋아요 취소
             : [...quiz.likes, user.id]; // 좋아요 추가
-          return {...quiz, likes: updatedLikes};
+          const updatedDislikes = quiz.dislikes.filter(uid => uid !== user.id); // 싫어요 취소
+          updateQuizLikesOnServer(id, updatedLikes, updatedDislikes).finally(
+            () => setIsUpdating(false),
+          ); // 서버 응답 후에 상태 재설정
+          return {...quiz, likes: updatedLikes, dislikes: updatedDislikes};
         }
         return quiz;
       }),
@@ -31,6 +42,11 @@ const QuizTap = () => {
   };
 
   const handleDislike = id => {
+    if (isUpdating) {
+      // 서버 업데이트 중엔 차단
+      return;
+    }
+
     setQuizzes(prevQuizzes =>
       prevQuizzes.map(quiz => {
         if (quiz.id === id) {
@@ -38,18 +54,37 @@ const QuizTap = () => {
           const updatedDislikes = hasDisliked
             ? quiz.dislikes.filter(uid => uid !== user.id) // 싫어요 취소
             : [...quiz.dislikes, user.id]; // 싫어요 추가
-          return {...quiz, dislikes: updatedDislikes};
+          const updatedLikes = quiz.likes.filter(uid => uid !== user.id); // 좋아요 취소
+          updateQuizLikesOnServer(id, updatedLikes, updatedDislikes).finally(
+            () => setIsUpdating(false),
+          );
+          return {...quiz, dislikes: updatedDislikes, likes: updatedLikes};
         }
         return quiz;
       }),
     );
   };
+  const updateQuizLikesOnServer = async (id, likes, dislikes) => {
+    try {
+      const response = await fetch(`${realUrl}/quizzes/${id}/reactions`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({likes, dislikes}),
+      });
+      if (!response.ok) {
+        throw new Error('서버와의 동기화에 실패했습니다.');
+      }
+    } catch (error) {
+      Alert.alert('오류', '서버와 동기화하는 데 실패했습니다.');
+    }
+  };
 
   const sortByDate = () => {
     setQuizzes(prevQuizzes =>
       [...prevQuizzes].sort((a, b) => {
-        console.log(b.date);
-        console.log(a.date);
         return new Date(b.date) - new Date(a.date);
       }),
     );
@@ -100,6 +135,7 @@ const QuizTap = () => {
       </View>
     );
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>

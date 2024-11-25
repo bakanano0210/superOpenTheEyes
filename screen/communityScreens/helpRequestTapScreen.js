@@ -11,7 +11,17 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMainContext} from '../../component/mainContext';
 
 const HelpRequestTap = ({navigation}) => {
-  const {helpRequests} = useMainContext();
+  const {helpRequests, realUrl} = useMainContext();
+  // {
+  //   id: '2',
+  //   title: '어디가 틀린건가요ㅠㅠㅠㅠ',
+  //   description: '몇 시간을 때려박아도 모르겠어요ㅠㅠㅠ',
+  //   date: '2024.10.25 12:31:32',
+  //   user: 'User2',
+  //   userId: '2',
+  //   comments: 1,
+  //   uri: [],
+  // },
   const [searchText, setSearchText] = useState('');
   const [filteredHelpRequests, setFilteredHelpRequests] =
     useState(helpRequests);
@@ -21,6 +31,8 @@ const HelpRequestTap = ({navigation}) => {
     );
     setFilteredHelpRequests(filtered);
   }, [helpRequests, searchText]);
+
+  // 서버에서 게시물 정보를 가져오는 함수
 
   const renderItem = ({item}) => (
     <TouchableOpacity
@@ -40,7 +52,7 @@ const HelpRequestTap = ({navigation}) => {
         </View>
         <View style={styles.postFooter}>
           <Text style={styles.postDate}>{item.date}</Text>
-          <Text style={styles.postUser}>{item.user}</Text>
+          <Text style={styles.postUser}>{item.userName}</Text>
         </View>
       </View>
     </TouchableOpacity>
