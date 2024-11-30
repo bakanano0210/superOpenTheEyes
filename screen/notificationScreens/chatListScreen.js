@@ -1,15 +1,29 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
+import {useMainContext} from '../../component/mainContext';
 const ChatListScreen = ({navigation}) => {
-  const chatRooms = [
-    {
-      id: '1',
-      title: 'User 님과의 멘토링',
-      lastMessage: '아 알겠습니다. 그런 뜻이었군요.',
-      timestamp: 'Date',
-    },
-  ];
+  const [chatRooms, setChatRooms] = useState([]);
+  const {token, user, emulUrl} = useMainContext();
 
+  useEffect(() => {
+    const fetchChatRooms = async () => {
+      try {
+        const response = await fetch(`${emulUrl}/chat-rooms/user/${user.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('채팅방 데이터를 가져올 수 없습니다.');
+        }
+        const data = await response.json();
+        setChatRooms(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchChatRooms();
+  }, []);
   const handleChatRoomPress = chatRoom => {
     navigation.navigate('ChatRoom', {chatRoom});
   };

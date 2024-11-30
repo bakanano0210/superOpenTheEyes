@@ -231,7 +231,9 @@ const NotificationStackNavigator = () => {
       <Stack.Screen
         name="ChatRoom"
         component={ChatRoomScreen}
-        options={{title: 'User 님과의 멘토링'}}
+        options={({route}) => ({
+          title: route.params.chatRoom.title, // 동적으로 설정
+        })}
       />
     </Stack.Navigator>
   );

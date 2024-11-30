@@ -68,6 +68,20 @@ export const CustomMenu = () => {
     </View>
   );
 };
+
+export const formatDate = () => {
+  const date = new Date();
+
+  const yyyy = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+
+  return `${yyyy}-${MM}-${dd} ${hh}:${mm}:${ss}`;
+};
+
 export const handleNavigate = ({navigation}, destination) => {
   navigation.navigate(destination); // 원하는 화면으로 이동
 };

@@ -22,7 +22,7 @@ import {useMainContext} from '../../component/mainContext';
 const {width} = Dimensions.get('window');
 
 const HomeScreen = ({route, navigation}) => {
-  const {user, setUser, token, realUrl} = useMainContext();
+  const {user, setUser, token, emulUrl} = useMainContext();
   const [subjectCardInfoList, setSubjectCardInfoList] = useState([]); // 사용자 과목 리스트
   const [mode, setMode] = useState(null); // 과목 수정 및 추가 모드 결정
   const [modalOptionVisible, setModalOptionVisible] = useState(false); // 수정 및 추가 모달 렌더링 유무
@@ -39,7 +39,7 @@ const HomeScreen = ({route, navigation}) => {
         style: 'destructive',
         onPress: async () => {
           try {
-            const response = await fetch(`${realUrl}/subjects/${id}`, {
+            const response = await fetch(`${emulUrl}/subjects/${id}`, {
               method: 'DELETE',
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -48,7 +48,7 @@ const HomeScreen = ({route, navigation}) => {
             if (response.ok) {
               // 서버의 최신 총 공부 시간 FETCH
               const timeResponse = await fetch(
-                `${realUrl}/users/${user.id}/study-time`,
+                `${emulUrl}/users/${user.id}/study-time`,
                 {
                   headers: {Authorization: `Bearer ${token}`},
                 },
@@ -81,7 +81,7 @@ const HomeScreen = ({route, navigation}) => {
   const handleUpdateSubjectTime = useCallback(
     async (subjectId, elapsedTime) => {
       try {
-        const response = await fetch(`${realUrl}/study/update-time`, {
+        const response = await fetch(`${emulUrl}/study/update-time`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const HomeScreen = ({route, navigation}) => {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await fetch(`${realUrl}/subjects`, {
+        const response = await fetch(`${emulUrl}/subjects`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -160,7 +160,7 @@ const HomeScreen = ({route, navigation}) => {
   useEffect(() => {
     const fetchUserStudyTime = async () => {
       try {
-        const response = await fetch(`${realUrl}/users/${user.id}/study-time`, {
+        const response = await fetch(`${emulUrl}/users/${user.id}/study-time`, {
           headers: {Authorization: `Bearer ${token}`},
         });
         if (response.ok) {

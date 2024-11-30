@@ -14,7 +14,7 @@ import {useMainContext} from '../../component/mainContext';
 const {width, height} = Dimensions.get('window');
 
 const QuizTap = () => {
-  const {quizzes, setQuizzes, user, token, realUrl} = useMainContext();
+  const {quizzes, setQuizzes, user, token, emulUrl} = useMainContext();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleLike = id => {
@@ -66,7 +66,7 @@ const QuizTap = () => {
   };
   const updateQuizLikesOnServer = async (id, likes, dislikes) => {
     try {
-      const response = await fetch(`${realUrl}/quizzes/${id}/reactions`, {
+      const response = await fetch(`${emulUrl}/quizzes/${id}/reactions`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

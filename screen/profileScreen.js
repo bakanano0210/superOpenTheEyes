@@ -20,13 +20,12 @@ const ProfileScreen = ({navigation}) => {
     rankedInGroup,
     studyGroups,
     token,
-    realUrl,
+    emulUrl,
   } = useMainContext();
   const userDailyRank =
-    rankedDaily?.find(item => item.name === user.name) || null;
+    rankedDaily?.find(item => item.userName === user.userName) || null;
   const userGroupRank =
-    rankedInGroup?.find(item => item.name === user.name) || null;
-
+    rankedInGroup?.find(item => item.userName === user.userName) || null;
   const handleChoosePhoto = () => {
     launchImageLibrary(
       {
@@ -48,7 +47,7 @@ const ProfileScreen = ({navigation}) => {
           });
           try {
             const uploadResponse = await fetch(
-              `${realUrl}/users/upload-profile-image`,
+              `${emulUrl}/users/upload-profile-image`,
               {
                 method: 'POST',
                 headers: {
@@ -88,7 +87,7 @@ const ProfileScreen = ({navigation}) => {
   useEffect(() => {
     const fetchContinuousAttendanceDays = async () => {
       try {
-        const response = await fetch(`${realUrl}/study/continuous-attendance`, {
+        const response = await fetch(`${emulUrl}/study/continuous-attendance`, {
           headers: {Authorization: `Bearer ${token}`}, // 인증 헤더 추가
         });
         if (response.ok) {
@@ -118,14 +117,14 @@ const ProfileScreen = ({navigation}) => {
       }
     }
   }, [user, studyGroups]); // data와 studyGroups가 변경될 때만 실행
-  console.log(`${realUrl}${user.profileImageUri}`);
+  console.log(`${emulUrl}${user.profileImageUri}`);
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.profileView} onPress={handleChoosePhoto}>
         <Image
           source={
             user.profileImageUri
-              ? {uri: `${realUrl}${user.profileImageUri}`}
+              ? {uri: `${emulUrl}${user.profileImageUri}`}
               : require('../assets/exampleImg.png')
           }
           resizeMode="contain"

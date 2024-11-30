@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {CustomButton, CustomLoginInput} from '../component/custom';
+import {CustomButton, CustomLoginInput, formatDate} from '../component/custom';
 import {commonStyles} from '../public/styles';
 import {useMainContext} from '../component/mainContext';
 
@@ -20,8 +20,12 @@ const RegistrationScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const {realUrl} = useMainContext();
-
+  const {emulUrl} = useMainContext();
+  // 쿼리 파라미터 생성
+  const queryParams = new URLSearchParams({
+    verificationCode: verificationCode,
+    receivedAt: formatDate(),
+  }).toString();
   // 이메일로 인증번호 전송 요청
   const handleSendVerificationCode = async () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,7 +34,7 @@ const RegistrationScreen = ({navigation}) => {
       return;
     }
     try {
-      const response = await fetch(`${realUrl}/users/send-verification-code`, {
+      const response = await fetch(`${emulUrl}/users/send-verification-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +66,7 @@ const RegistrationScreen = ({navigation}) => {
     }
     try {
       const response = await fetch(
-        `${realUrl}/users/verify-code-register?verificationCode=${verificationCode}`,
+        `${emulUrl}/users/verify-code-register?${queryParams}`,
         {
           method: 'POST',
           headers: {
@@ -73,7 +77,6 @@ const RegistrationScreen = ({navigation}) => {
             userPassword: password,
             userEmail: email,
             confirmPassword,
-            verificationCode,
           }),
         },
       );
@@ -139,13 +142,13 @@ const RegistrationScreen = ({navigation}) => {
         {isCodeSent ? (
           <View>
             <CustomButton text="회원가입" onPress={handleRegister} />
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Login')}
-              style={styles.loginButtonStyle}>
-              <Text style={styles.loginText}>로그인하기</Text>
-            </TouchableOpacity>
           </View>
         ) : null}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Login')}
+          style={styles.loginButtonStyle}>
+          <Text style={styles.loginText}>로그인하기</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

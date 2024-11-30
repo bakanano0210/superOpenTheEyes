@@ -1,4 +1,4 @@
-import {useRoute} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useLayoutEffect, useState, useEffect} from 'react';
 import {
   View,
@@ -17,18 +17,26 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMainContext} from '../../component/mainContext';
 import {CommunityOwnerRightHeader} from '../../component/header';
+import {formatDate} from '../../component/custom';
 
 const {width, height} = Dimensions.get('window');
 
 const HelpRequestViewScreen = ({navigation}) => {
-  const {setHelpRequests, user, token, realUrl} = useMainContext();
+  const {setHelpRequests, user, token, emulUrl} = useMainContext();
   const route = useRoute();
-  const {post} = route.params;
+  const [currentPost, setCurrentPost] = useState(route.params.post);
   const {comments, setComments} = useMainContext();
   const [newComment, setNewComment] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
-  const isAuthor = user.id === post.userId;
+  const isAuthor = user.id === currentPost.userId;
+  const [hasMentor, setHasMentor] = useState(true);
+
+  // 쿼리 파라미터 생성
+  const queryParams = new URLSearchParams({
+    userId: user.id,
+    postId: currentPost.userId,
+  }).toString();
   useLayoutEffect(() => {
     if (isAuthor) {
       navigation.setOptions({
@@ -36,22 +44,73 @@ const HelpRequestViewScreen = ({navigation}) => {
       });
     }
   }, [navigation, isAuthor]);
-
+  console.log(currentPost);
   const filteredComments = comments.filter(
-    comment => comment.postId === post.id,
+    comment => comment.postId === currentPost.id,
   );
 
   const handleMentorRequest = () => {
-    Alert.alert('멘토 요청', `${post.user}님에게 멘토 요청을 보내시겠습니까?`, [
-      {text: '취소', style: 'cancel'},
-      {
-        text: '확인',
-        onPress: () => {
-          // 알림 전송 로직 추가 (예: API 호출)
-          Alert.alert('멘토 요청 완료', '멘토 요청 알림이 전송되었습니다.');
+    Alert.alert(
+      '멘토 요청',
+      `${currentPost.userName}님에게 멘토 요청을 보내시겠습니까?`,
+      [
+        {text: '취소', style: 'cancel'},
+        {
+          text: '확인',
+          onPress: async () => {
+            try {
+              const response = await fetch(
+                `${emulUrl}/mentor-relationships/request`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    senderId: user.id,
+                    senderName: user.userName,
+                    receiverId: currentPost.userId,
+                  }),
+                },
+              );
+
+              if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+              }
+              Alert.alert('멘토 요청 완료', '멘토 요청 알림이 전송되었습니다.');
+            } catch (error) {
+              console.error('Error sending mentor request: ', error);
+              Alert.alert('오류', '멘토 요청에 실패했습니다.');
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
+  };
+  const checkMentorRelationship = async () => {
+    try {
+      const response = await fetch(
+        `${emulUrl}/mentor-relationships/check?${queryParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('멘토 관계 확인에 실패했습니다.');
+      }
+      console.log(user.id);
+      const data = await response.json();
+      console.log('data');
+      console.log(data);
+      setHasMentor(data);
+    } catch (error) {
+      console.error('Error checking mentor relationship: ', error);
+    }
   };
 
   const renderComment = ({item}) => {
@@ -81,18 +140,26 @@ const HelpRequestViewScreen = ({navigation}) => {
   const renderPostHeader = () => (
     <View style={styles.postContainer}>
       <View style={styles.postHeader}>
-        <Text style={styles.postTitle}>{post.title}</Text>
-        <TouchableOpacity
-          style={styles.mentorRequestButton}
-          onPress={handleMentorRequest}>
-          <Text style={styles.mentorRequestText}>멘토 요청</Text>
-        </TouchableOpacity>
+        <Text style={styles.postTitle}>{currentPost.title}</Text>
+        {console.log(isAuthor)}
+        {console.log(hasMentor)}
+        {!isAuthor && !hasMentor && (
+          <TouchableOpacity
+            style={styles.mentorRequestButton}
+            onPress={handleMentorRequest}>
+            <Text style={styles.mentorRequestText}>멘토 요청</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <Text style={styles.postUser}>{post.userName}</Text>
-      <Text style={styles.postDate}>{post.date}</Text>
-      <Text style={styles.postContent}>{post.description}</Text>
-      {post.uri.map((uri, index) => (
-        <Image key={index} source={{uri}} style={styles.postImage} />
+      <Text style={styles.postUser}>{currentPost.userName}</Text>
+      <Text style={styles.postDate}>{currentPost.date}</Text>
+      <Text style={styles.postContent}>{currentPost.description}</Text>
+      {currentPost.uri.map((uri, index) => (
+        <Image
+          key={index}
+          source={{uri: `${emulUrl}${uri}`}}
+          style={styles.postImage}
+        />
       ))}
 
       {/* "댓글" 헤더 추가 */}
@@ -103,7 +170,7 @@ const HelpRequestViewScreen = ({navigation}) => {
   /* 게시글 관리 함수 */
   const handleEdit = () => {
     setMenuVisible(false);
-    navigation.navigate('HelpRequestPost', {post});
+    navigation.navigate('HelpRequestPost', {currentPost});
   };
   const handleDelete = async () => {
     Alert.alert('삭제 확인', '이 항목을 삭제하시겠습니까?', [
@@ -113,7 +180,7 @@ const HelpRequestViewScreen = ({navigation}) => {
         onPress: async () => {
           try {
             const response = await fetch(
-              `${realUrl}/help-requests/${post.id}`,
+              `${emulUrl}/help-requests/${currentPost.id}`,
               {
                 method: 'DELETE',
                 headers: {
@@ -125,7 +192,9 @@ const HelpRequestViewScreen = ({navigation}) => {
               throw new Error('게시물 삭제에 실패했습니다.');
             }
 
-            setHelpRequests(prev => prev.filter(item => item.id !== post.id));
+            setHelpRequests(prev =>
+              prev.filter(item => item.id !== currentPost.id),
+            );
             setMenuVisible(false);
             navigation.goBack();
           } catch (error) {
@@ -137,13 +206,37 @@ const HelpRequestViewScreen = ({navigation}) => {
     ]);
   };
 
+  const fetchPostDetails = async () => {
+    try {
+      const response = await fetch(
+        `${emulUrl}/help-requests/${currentPost.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('게시물 데이터를 가져오는데 실패했습니다.');
+      }
+
+      const updatedPost = await response.json();
+
+      setCurrentPost(updatedPost);
+    } catch (error) {
+      console.error('Error fetching post details', error);
+      Alert.alert('오류', '게시물 데이터를 가져오는데 실패했습니다.');
+    }
+  };
+
   /* 댓글 관리 함수 */
   const handleAddOrEditComment = async () => {
     if (newComment.trim()) {
       try {
         if (editingCommentId) {
           const response = await fetch(
-            `${realUrl}/comments/${editingCommentId}`,
+            `${emulUrl}/comments/${editingCommentId}`,
             {
               method: 'PUT',
               headers: {
@@ -152,7 +245,7 @@ const HelpRequestViewScreen = ({navigation}) => {
               },
               body: JSON.stringify({
                 content: newComment,
-                date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                date: formatDate(),
               }),
             },
           );
@@ -169,18 +262,18 @@ const HelpRequestViewScreen = ({navigation}) => {
           );
           setEditingCommentId(null);
         } else {
-          const response = await fetch(`${realUrl}/comments`, {
+          const response = await fetch(`${emulUrl}/comments`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              postId: post.id,
+              postId: currentPost.id,
               userId: user.id,
               userName: user.name,
               content: newComment,
-              date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+              date: formatDate(),
             }),
           });
 
@@ -193,7 +286,7 @@ const HelpRequestViewScreen = ({navigation}) => {
 
           // 서버로 post의 comments 증가 요청
           await fetch(
-            `${realUrl}/help-requests/${post.id}/increment-comments`,
+            `${emulUrl}/help-requests/${currentPost.id}/increment-comments`,
             {
               method: 'PATCH',
               headers: {
@@ -204,7 +297,7 @@ const HelpRequestViewScreen = ({navigation}) => {
 
           setHelpRequests(prevHelpRequests =>
             prevHelpRequests.map(item =>
-              item.id === post.id
+              item.id === currentPost.id
                 ? {
                     ...item,
                     comments: item.comments + 1,
@@ -231,7 +324,7 @@ const HelpRequestViewScreen = ({navigation}) => {
         text: '삭제',
         onPress: async () => {
           try {
-            const response = await fetch(`${realUrl}/comments/${comment.id}`, {
+            const response = await fetch(`${emulUrl}/comments/${comment.id}`, {
               method: 'DELETE',
               headers: {
                 Authorization: `Bearer ${token}`, // 인증 토큰 추가
@@ -246,7 +339,7 @@ const HelpRequestViewScreen = ({navigation}) => {
 
             // 서버로 post의 comments 감소 요청
             await fetch(
-              `${realUrl}/help-requests/${post.id}/decrement-comments`,
+              `${emulUrl}/help-requests/${currentPost.id}/decrement-comments`,
               {
                 method: 'PATCH',
                 headers: {
@@ -257,7 +350,7 @@ const HelpRequestViewScreen = ({navigation}) => {
 
             setHelpRequests(prevHelpRequests =>
               prevHelpRequests.map(item =>
-                item.id === post.id
+                item.id === currentPost.id
                   ? {
                       ...item,
                       comments: item.comments - 1,
@@ -275,11 +368,14 @@ const HelpRequestViewScreen = ({navigation}) => {
   };
   const fetchComments = async () => {
     try {
-      const response = await fetch(`${realUrl}/comments?postId=${post.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${emulUrl}/comments?postId=${currentPost.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error('댓글 데이터를 가져오는 데 실패했습니다.');
@@ -287,7 +383,7 @@ const HelpRequestViewScreen = ({navigation}) => {
 
       const data = await response.json();
       setComments(prev => [
-        ...prev.filter(comment => comment.postId !== post.id), // 기존 댓글 제거
+        ...prev.filter(comment => comment.postId !== currentPost.id), // 기존 댓글 제거
         ...data,
       ]);
     } catch (error) {
@@ -295,9 +391,16 @@ const HelpRequestViewScreen = ({navigation}) => {
     }
   };
   useEffect(() => {
+    checkMentorRelationship();
     fetchComments();
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPostDetails();
+      fetchComments(); // 화면이 다시 포커스될 때 게시물 데이터 새로고침
+    }, []),
+  );
   return (
     <KeyboardAvoidingView style={styles.container}>
       <FlatList

@@ -1,23 +1,66 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from 'react-native';
+import {useMainContext} from '../../component/mainContext';
+import {useRoute} from '@react-navigation/native';
+import {formatDate} from '../../component/custom';
 
-const MessageWriteScreen = () => {
+const MessageWriteScreen = ({navigation}) => {
   const [title, setTitle] = useState('');
   const [recipient, setRecipient] = useState('');
   const [content, setContent] = useState('');
+  const {emulUrl, token, user} = useMainContext();
+  const route = useRoute();
 
-  const handleSend = () => {
-    console.log('제목:', title);
-    console.log('수신자:', recipient);
-    console.log('내용:', content);
-    // 전송 로직 추가
-    alert('메시지가 전송되었습니다.');
+  useEffect(() => {
+    if (route.params?.receiverName) {
+      setRecipient(route.params.receiverName); // 전달받은 값 설정
+    }
+  }, [route.param]);
+
+  const handleSend = async () => {
+    if (!title || !recipient || !content) {
+      Alert.alert('모든 필드를 입력하세요.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${emulUrl}/notifications/send-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          senderName: user.userName,
+          title: title,
+          receiverName: recipient,
+          content: content,
+          senderId: user.id, // 로그인한 사용자 ID
+          receivedAt: formatDate(),
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('쪽지가 성공적으로 전송되었습니다.');
+        setTitle('');
+        setRecipient('');
+        setContent('');
+        navigation.goBack();
+      } else {
+        const errorText = await response.text();
+        Alert.alert(`쪽지 전송 실패: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error sending message: ', error);
+      Alert.alert('쪽지 전송 중 오류가 발생했습니다.');
+    }
   };
 
   return (

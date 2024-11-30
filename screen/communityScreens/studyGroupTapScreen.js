@@ -24,7 +24,7 @@ const StudyGroupTap = ({
   setIsEditMode,
   navigation,
 }) => {
-  const {token, realUrl} = useMainContext();
+  const {token, emulUrl} = useMainContext();
   const [selectedGroup, setSelectedGroup] = useState({
     id: '',
     leaderId: '',
@@ -40,7 +40,8 @@ const StudyGroupTap = ({
   const [searchText, setSearchText] = useState('');
   const [filteredGroups, setFilteredGroups] = useState(studyGroups);
   const {user, setUser} = useMainContext();
-
+  console.log('studyGroups');
+  console.log(studyGroups);
   const handleChoosePhoto = () => {
     launchImageLibrary(
       {
@@ -69,7 +70,7 @@ const StudyGroupTap = ({
 
     try {
       const uploadResponse = await fetch(
-        `${realUrl}/study-groups/${groupId}/upload-group-image`,
+        `${emulUrl}/study-groups/${groupId}/upload-group-image`,
         {
           method: 'POST',
           headers: {
@@ -108,7 +109,7 @@ const StudyGroupTap = ({
         text: '삭제',
         onPress: async () => {
           try {
-            const response = await fetch(`${realUrl}/study-groups/${id}`, {
+            const response = await fetch(`${emulUrl}/study-groups/${id}`, {
               method: 'DELETE',
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -153,7 +154,7 @@ const StudyGroupTap = ({
       };
       try {
         const response = await fetch(
-          `${realUrl}/study-groups/${selectedGroup.id}`,
+          `${emulUrl}/study-groups/${selectedGroup.id}`,
           {
             method: 'PUT',
             headers: {
@@ -208,7 +209,7 @@ const StudyGroupTap = ({
         limit: newGroupLimit,
       };
       try {
-        const response = await fetch(`${realUrl}/study-groups`, {
+        const response = await fetch(`${emulUrl}/study-groups`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -269,7 +270,7 @@ const StudyGroupTap = ({
             <Image
               source={
                 item.imageUri
-                  ? {uri: `${realUrl}${item.imageUri}`}
+                  ? {uri: `${emulUrl}${item.imageUri}`}
                   : require('../../assets/exampleImg.png')
               }
               resizeMode="contain"

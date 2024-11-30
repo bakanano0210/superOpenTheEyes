@@ -34,9 +34,15 @@ const LoginScreen = ({navigation}) => {
     fetchHelpRequests,
     fetchQuizzes,
     fetchRankingData,
-    realUrl,
-    studyGroups,
+    emulUrl,
+    fetchNotifications,
   } = useMainContext();
+  const fetchingFunction = async () => {
+    await fetchStudyGroups();
+    await fetchHelpRequests();
+    await fetchQuizzes();
+    await fetchRankingData();
+  };
   // 로그인 화면에 올 때마다 이메일과 비밀번호 초기화
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -45,24 +51,19 @@ const LoginScreen = ({navigation}) => {
     });
     return unsubscribe;
   }, [navigation]);
-
   useEffect(() => {
-    fetchStudyGroups();
-    fetchHelpRequests();
-    fetchQuizzes();
+    if (user?.id && token) {
+      fetchingFunction();
+      fetchNotifications(user.id);
+    }
   }, [user, token]);
-
-  useEffect(() => {
-    fetchRankingData();
-  }, [user]);
-
 
   const checkLoginStatus = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       const remember = await AsyncStorage.getItem('rememberMe'); // "로그인 유지" 상태 확인
       if (token && remember === 'true') {
-        const response = await fetch(`${realUrl}/users/validate`, {
+        const response = await fetch(`${emulUrl}/users/validate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -73,9 +74,8 @@ const LoginScreen = ({navigation}) => {
         if (response.ok) {
           setToken(token);
           const user = await response.json();
-          console.log('user'); // 사용자 정보 파싱
-          console.log(user);
           setUser(user);
+
           handleNavigate({navigation}, 'MainApp');
         } else {
           console.log(response);
@@ -98,7 +98,7 @@ const LoginScreen = ({navigation}) => {
   const login = async (userEmail, password) => {
     console.log('loginTocuhed!');
     try {
-      const response = await fetch(`http://192.168.200.195:8082/users/login`, {
+      const response = await fetch(`${emulUrl}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

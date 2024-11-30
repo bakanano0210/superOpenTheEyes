@@ -12,20 +12,27 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useRoute} from '@react-navigation/native';
 import {useMainContext} from '../../component/mainContext';
-import {CustomButton} from '../../component/custom';
+import {CustomButton, formatDate} from '../../component/custom';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const HelpRequestPostScreen = ({navigation}) => {
-  const {setHelpRequests, user, token, realUrl} = useMainContext();
+  const {setHelpRequests, user, token, emulUrl} = useMainContext();
   const route = useRoute();
-  const {post} = route.params || {};
+  const {currentPost} = route.params || {};
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
-  const [imageUris, setImageUris] = useState(post?.uri || []);
+  const [uploadedImageUris, setUploadedImageUris] = useState(
+    Array.isArray(currentPost?.uri) ? currentPost.uri : [],
+  );
+  const [localImageUris, setLocalImageUris] = useState([]);
+  console.log('localImageUris');
+  console.log(localImageUris);
+  console.log('uploadedImageUris');
+  console.log(uploadedImageUris);
   useEffect(() => {
-    setTitle(post?.title || '');
-    setDescription(post?.description || '');
-  }, [post]);
+    setTitle(currentPost?.title || '');
+    setDescription(currentPost?.description || '');
+  }, [currentPost]);
 
   const handleChoosePhotos = () => {
     launchImageLibrary(
@@ -40,7 +47,9 @@ const HelpRequestPostScreen = ({navigation}) => {
           console.log('ImagePicker Error: ', response.errorMessage);
         } else if (response.assets) {
           const uris = response.assets.map(asset => asset.uri);
-          setImageUris(prevUris => [...prevUris, ...uris]);
+          setLocalImageUris(prevUris =>
+            Array.isArray(prevUris) ? [...prevUris, ...uris] : uris,
+          );
         }
       },
     );
@@ -50,76 +59,165 @@ const HelpRequestPostScreen = ({navigation}) => {
       Alert.alert('입력 오류', '제목과 내용을 모두 입력해주세요.');
       return;
     }
-    if (post?.id) {
-      const updatedPost = {
-        ...post,
-        title,
-        description,
-        uri: imageUris,
-      };
-      try {
-        const response = await fetch(
-          `${realUrl}/help-requests/${post.id}?userId=${user.id}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(updatedPost),
-          },
-        );
-        if (!response.ok) {
-          throw new Error('요청 처리 실패');
-        }
-
-        const savedPost = await response.json();
-
-        setHelpRequests(prev =>
-          prev.map(item => (item.id === post.id ? updatedPost : item)),
-        );
-        navigation.navigate('HelpRequestView', {post: updatedPost});
-      } catch (error) {
-        console.error(error);
-        Alert.alert('오류', error.message);
+    try {
+      if (currentPost?.id) {
+        // **수정 로직**
+        await handleUpdatePost();
+      } else {
+        // **추가 로직**
+        await handleCreatePost();
       }
-    } else {
-      const newPost = {
-        title,
-        description,
-        date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        user: user.name,
-        userId: user.id,
-        comments: 0,
-        uri: imageUris,
-      };
-      try {
-        const response = await fetch(
-          `${realUrl}/help-requests?userId=${user.id}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(newPost),
-          },
-        );
 
-        if (!response.ok) {
-          throw new Error('게시물 저장 실패');
-        }
-
-        const savedPost = await response.json();
-        setHelpRequests(prev => [savedPost, ...prev]);
-        navigation.goBack();
-      } catch (error) {
-        Alert.alert('Error', error.message);
-      }
+      navigation.goBack();
+    } catch (error) {
+      console.error(error);
+      Alert.alert('오류', error.message);
     }
   };
+
+  const handleCreatePost = async () => {
+    // 게시물 생성
+    const newPostPayload = {
+      title,
+      description,
+      userId: user.id,
+      date: formatDate(),
+      comments: 0,
+      uri: [],
+    };
+
+    const createResponse = await fetch(
+      `${emulUrl}/help-requests?userId=${user.id}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newPostPayload),
+      },
+    );
+
+    if (!createResponse.ok) {
+      throw new Error('게시물 저장 실패');
+    }
+
+    const savedPost = await createResponse.json();
+
+    // 이미지 업로드
+    if (localImageUris.length > 0) {
+      const uploadedUris = await Promise.all(
+        localImageUris.map(uri => uploadImage(uri)),
+      );
+      savedPost.uri = uploadedUris; // 업로드된 이미지 URI 설정
+    }
+
+    setHelpRequests(prev => [savedPost, ...prev]);
+  };
+
+  const handleUpdatePost = async () => {
+    // 새로 추가된 이미지 업로드
+    const newlyUploadedUris = await Promise.all(
+      localImageUris.map(uri => uploadImage(uri)),
+    );
+
+    const updatedUris = [
+      ...(Array.isArray(uploadedImageUris) ? uploadedImageUris : []),
+      ...newlyUploadedUris,
+    ];
+
+    // 삭제된 이미지 처리
+    const removedUris = currentPost.uri.filter(
+      uri => !uploadedImageUris.includes(uri),
+    );
+    if (removedUris.length > 0) {
+      await fetch(`${emulUrl}/help-requests/${currentPost.id}/delete-images`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({uris: removedUris}),
+      });
+    }
+
+    // 게시물 업데이트
+    const updatedPostPayload = {
+      title,
+      description,
+      uri: updatedUris,
+    };
+    console.log('updatedPostPayload');
+    console.log(updatedPostPayload);
+
+    const updateResponse = await fetch(
+      `${emulUrl}/help-requests/${currentPost.id}?userId=${user.id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedPostPayload),
+      },
+    );
+
+    if (!updateResponse.ok) {
+      throw new Error('게시물 수정 실패');
+    }
+
+    const updatedPost = await updateResponse.json();
+
+    // 상태 업데이트
+    setHelpRequests(prev =>
+      prev.map(item => (item.id === currentPost.id ? updatedPost : item)),
+    );
+  };
+
   const handleDeleteImage = uri => {
-    setImageUris(prevUris => prevUris.filter(item => item !== uri)); // 선택한 이미지 URI 삭제
+    if (Array.isArray(uploadedImageUris) && uploadedImageUris.includes(uri)) {
+      setUploadedImageUris(prevUris =>
+        Array.isArray(prevUris) ? prevUris.filter(item => item !== uri) : [],
+      ); // 기존 이미지 삭제
+    } else {
+      setLocalImageUris(prevUris =>
+        Array.isArray(prevUris) ? prevUris.filter(item => item !== uri) : [],
+      ); // 새 이미지 삭제
+    }
+  };
+
+  const uploadImage = async uri => {
+    console.log(uri);
+    const formData = new FormData();
+    formData.append('file', {
+      uri,
+      type: 'image/jpeg',
+      name: 'photo.jpg',
+    });
+
+    try {
+      const response = await fetch(
+        `${emulUrl}/help-requests/${currentPost.id}/upload-image`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('이미지 업로드 실패');
+      }
+
+      const {imageUri} = await response.json();
+      return imageUri;
+    } catch (error) {
+      console.error(error);
+      Alert.alert('오류', '이미지 업로드에 실패했습니다.');
+      throw error;
+    }
   };
 
   return (
@@ -150,9 +248,17 @@ const HelpRequestPostScreen = ({navigation}) => {
         </View>
 
         <ScrollView horizontal style={styles.imagePreviewContainer}>
-          {imageUris.map((uri, index) => (
+          {[...uploadedImageUris, ...localImageUris].map((uri, index) => (
             <View key={index} style={styles.imagePreviewWrapper}>
-              <Image key={index} source={{uri}} style={styles.previewImage} />
+              <Image
+                key={index}
+                source={{
+                  uri: uri.startsWith('file://')
+                    ? `${uri}`
+                    : `${emulUrl}${uri}`,
+                }}
+                style={styles.previewImage}
+              />
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => handleDeleteImage(uri)}>

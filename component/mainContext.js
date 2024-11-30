@@ -1,7 +1,6 @@
 // 프로젝트에서 전체적으로 공유할 변수 목록
 
-import React, {createContext, useState, useContext, useEffect} from 'react';
-import {timeToSeconds} from './subject';
+import React, {createContext, useState, useContext} from 'react';
 import {Alert} from 'react-native';
 const MainContext = createContext();
 
@@ -36,7 +35,7 @@ export const MainProvider = ({children}) => {
       return;
     }
     try {
-      const response = await fetch(`${realUrl}/study-groups`, {
+      const response = await fetch(`${emulUrl}/study-groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -56,7 +55,7 @@ export const MainProvider = ({children}) => {
       return;
     }
     try {
-      const response = await fetch(`${realUrl}/help-requests`, {
+      const response = await fetch(`${emulUrl}/help-requests`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -180,7 +179,7 @@ export const MainProvider = ({children}) => {
       return;
     }
     try {
-      const response = await fetch(`${realUrl}/quizzes`, {
+      const response = await fetch(`${emulUrl}/quizzes`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -208,14 +207,14 @@ export const MainProvider = ({children}) => {
     }
     try {
       // Fetch daily ranking
-      const dailyResponse = await fetch(`${realUrl}/rankings/daily`, {
+      const dailyResponse = await fetch(`${emulUrl}/rankings/daily`, {
         headers: {Authorization: `Bearer ${token}`},
       });
       const dailyData = await dailyResponse.json();
       setRankedDaily(dailyData);
 
       // Fetch group ranking
-      const groupResponse = await fetch(`${realUrl}/rankings/groups`, {
+      const groupResponse = await fetch(`${emulUrl}/rankings/groups`, {
         headers: {Authorization: `Bearer ${token}`},
       });
       const groupData = await groupResponse.json();
@@ -224,7 +223,7 @@ export const MainProvider = ({children}) => {
       // Fetch in-group ranking
       if (user?.studyGroupId) {
         const inGroupResponse = await fetch(
-          `${realUrl}/rankings/group/${user.studyGroupId}`,
+          `${emulUrl}/rankings/group/${user.studyGroupId}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
         const inGroupData = await inGroupResponse.json();
@@ -234,7 +233,34 @@ export const MainProvider = ({children}) => {
       console.error('랭킹 데이터를 불러오는 데 실패했습니다:', error);
     }
   };
+  const [notifications, setNotifications] = useState([]);
+  const fetchNotifications = async userId => {
+    try {
+      if (!userId) {
+        throw new Error('사용자 ID가 유효하지 않습니다.');
+      }
+      const response = await fetch(
+        `${emulUrl}/notifications?userId=${userId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`서버 응답 오류: ${response.status} - ${errorText}`);
+      }
+
+      const notifications = await response.json();
+      console.log('알림 데이터:', notifications);
+      setNotifications(notifications);
+    } catch (error) {
+      console.error('Error fetching notifications', error);
+    }
+  };
   const [token, setToken] = useState(null);
   return (
     <MainContext.Provider
@@ -262,6 +288,9 @@ export const MainProvider = ({children}) => {
         fetchRankingData,
         emulUrl,
         realUrl,
+        notifications,
+        setNotifications,
+        fetchNotifications,
       }}>
       {children}
     </MainContext.Provider>

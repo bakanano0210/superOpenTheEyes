@@ -33,7 +33,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
     studyGroups,
     setStudyGroups,
     token,
-    realUrl,
+    emulUrl,
     rankedGroup,
   } = useMainContext();
   const [members, setMembers] = useState([]);
@@ -50,7 +50,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
     const fetchGroupMembers = async () => {
       try {
         const response = await fetch(
-          `${realUrl}/study-groups/${info.id}/members`,
+          `${emulUrl}/study-groups/${info.id}/members`,
           {
             headers: {
               'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
       <Image
         source={
           item.profileImageUri
-            ? {uri: `${realUrl}${item.profileImageUri}`}
+            ? {uri: `${emulUrl}${item.profileImageUri}`}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"
@@ -104,7 +104,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
   // 그룹 탈퇴 처리
   const handleLeaveGroup = async () => {
     try {
-      const response = await fetch(`${realUrl}/study-groups/${info.id}/leave`, {
+      const response = await fetch(`${emulUrl}/study-groups/${info.id}/leave`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
     }
 
     try {
-      const response = await fetch(`${realUrl}/study-groups/${info.id}/join`, {
+      const response = await fetch(`${emulUrl}/study-groups/${info.id}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
