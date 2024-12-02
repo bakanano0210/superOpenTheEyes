@@ -11,6 +11,7 @@ import ProfileScreen from '../screen/profileScreen';
 import NotificationScreen from '../screen/notificationScreens/notificationScreen';
 import HelpRequestViewScreen from '../screen/communityScreens/helpRequestViewScreen';
 import {
+  ChatRoomRightHeader,
   EmptyLeftHeader,
   HomeLeftHeader,
   HomeRightHeader,
@@ -233,6 +234,7 @@ const NotificationStackNavigator = () => {
         component={ChatRoomScreen}
         options={({route}) => ({
           title: route.params.chatRoom.title, // 동적으로 설정
+          headerRight: ChatRoomRightHeader,
         })}
       />
     </Stack.Navigator>

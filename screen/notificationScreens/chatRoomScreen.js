@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -7,35 +7,59 @@ import {
   TextInput,
   FlatList,
   Keyboard,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMainContext} from '../../component/mainContext';
 import {formatDate} from '../../component/custom';
-const ChatRoomScreen = ({route}) => {
+import {ChatRoomRightHeader} from '../../component/header';
+const ChatRoomScreen = ({route, navigation}) => {
   const {chatRoom} = route.params;
-  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const {token, user, emulUrl} = useMainContext();
+  const {token, user, emulUrl, messages, setMessages} = useMainContext();
   const flatListRef = useRef(null);
-
+  const onMentoringEnd = async () => {
+    try {
+      const response = await fetch(
+        `${emulUrl}/mentor-relationships/${chatRoom.mentorRelationshipId}/end`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            receivedAt: formatDate(),
+          }),
+        },
+      );
+      Alert.alert('멘토링 종료', '멘토링이 성공적으로 종료되었습니다.');
+      navigation.navigate('NotificationScreen');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('오류', '멘토링 종료 중 문제가 발생했습니다.');
+    }
+  };
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => ChatRoomRightHeader({onMentoringEnd}),
+    });
+  }, [navigation]);
   console.log(chatRoom);
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const response = await fetch(
-          `${emulUrl}/messages/chat-room/${chatRoom.id}`,
+          `${emulUrl}/messages/chat-room/${chatRoom.id}?userId=${user.id}`,
           {
             headers: {Authorization: `Bearer ${token}`},
           },
         );
-        if (!response.ok) throw new Error('메시지를 가져올 수 없습니다.');
+        if (!response.ok) {
+          throw new Error('메시지를 가져올 수 없습니다.');
+        }
         const data = await response.json();
         setMessages(data);
-
-        // 스크롤을 가장 아래로 이동
-        setTimeout(() => {
-          flatListRef.current?.scrollToEnd({animated: false});
-        }, 1000); // 약간의 지연을 두어 FlatList가 렌더링될 시간을 확보
       } catch (error) {
         console.error(error);
       }
@@ -48,10 +72,14 @@ const ChatRoomScreen = ({route}) => {
       return;
     } // 빈 메시지 전송 방지
 
+    const isSenderMentor = chatRoom.mentorId === user.id;
+    const recipientId = isSenderMentor ? chatRoom.menteeId : chatRoom.mentorId;
+
     const tempMessage = {
       id: Date.now(), // 임시 ID 생성
       senderId: user.id,
       senderName: user.name || '나', // 사용자 이름 또는 '나'로 설정
+      recipientId,
       content: newMessage,
       timestamp: formatDate(),
       isTemporary: true, // 임시 메시지 여부 표시
@@ -72,6 +100,7 @@ const ChatRoomScreen = ({route}) => {
         body: JSON.stringify({
           chatRoomId: chatRoom.id,
           senderId: user.id,
+          recipientId,
           content: newMessage,
           timestamp: formatDate(),
         }),

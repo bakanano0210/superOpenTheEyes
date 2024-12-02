@@ -122,6 +122,26 @@ export const customRenderTabBar = props => {
   );
 };
 
+export const ChatRoomRightHeader = ({onMentoringEnd}) => {
+  return (
+    <TouchableOpacity
+      style={styles.mentoringEndButton}
+      onPress={() =>
+        Alert.alert(
+          '멘토링 완료',
+          '정말로 멘토링을 종료하시겠습니까?',
+          [
+            {text: '취소', style: 'cancle'},
+            {text: '확인', onPress: onMentoringEnd},
+          ],
+          {cancelable: true},
+        )
+      }>
+      <Text style={styles.mentoringEndText}>멘토링 완료</Text>
+    </TouchableOpacity>
+  );
+};
+
 const styles = StyleSheet.create({
   homeRightHeaderStyle: {
     marginRight: width * 0.025,
@@ -137,6 +157,17 @@ const styles = StyleSheet.create({
     textShadowColor: '#000', // 그림자 색상
     textShadowOffset: {width: 1, height: 1}, // 그림자 위치
     textShadowRadius: 1, // 그림자 강도
+  },
+  mentoringEndButton: {
+    backgroundColor: '#4a4e69',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  mentoringEndText: {
+    color: 'white',
+    fontSize: 14,
   },
   //헤더 스타일 정의
 });

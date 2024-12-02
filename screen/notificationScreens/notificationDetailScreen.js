@@ -33,13 +33,11 @@ const NotificationDetailScreen = ({route}) => {
           createdAt: formatDate(),
         }),
       });
-
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText);
       }
       await handleAccept();
-
       Alert.alert('멘토 관계 수락', '멘토 요청이 수락되었습니다.');
       navigation.goBack(); // 이전 화면으로 이동
     } catch (error) {

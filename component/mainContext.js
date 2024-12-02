@@ -261,6 +261,8 @@ export const MainProvider = ({children}) => {
       console.error('Error fetching notifications', error);
     }
   };
+  const [messages, setMessages] = useState([]);
+  const [chatRooms, setChatRooms] = useState([]);
   const [token, setToken] = useState(null);
   return (
     <MainContext.Provider
@@ -291,6 +293,10 @@ export const MainProvider = ({children}) => {
         notifications,
         setNotifications,
         fetchNotifications,
+        messages,
+        setMessages,
+        chatRooms,
+        setChatRooms,
       }}>
       {children}
     </MainContext.Provider>

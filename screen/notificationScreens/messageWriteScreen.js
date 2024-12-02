@@ -77,7 +77,7 @@ const MessageWriteScreen = ({navigation}) => {
       <Text style={styles.label}>수신자</Text>
       <TextInput
         style={styles.input}
-        placeholder="수신자 아이디를 입력하세요."
+        placeholder="수신자 닉네임을 입력하세요."
         placeholderTextColor="#aaa"
         value={recipient}
         onChangeText={setRecipient}

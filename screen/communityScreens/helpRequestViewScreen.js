@@ -71,6 +71,7 @@ const HelpRequestViewScreen = ({navigation}) => {
                     senderId: user.id,
                     senderName: user.userName,
                     receiverId: currentPost.userId,
+                    receivedAt: formatDate(),
                   }),
                 },
               );
@@ -153,7 +154,10 @@ const HelpRequestViewScreen = ({navigation}) => {
       </View>
       <Text style={styles.postUser}>{currentPost.userName}</Text>
       <Text style={styles.postDate}>{currentPost.date}</Text>
-      <Text style={styles.postContent}>{currentPost.description}</Text>
+      <View>
+        <Text style={styles.postContent}>{currentPost.description}</Text>
+      </View>
+
       {currentPost.uri.map((uri, index) => (
         <Image
           key={index}
@@ -488,6 +492,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   postContent: {
+    minHeight: 100,
     fontSize: 16,
     marginBottom: 10,
   },
