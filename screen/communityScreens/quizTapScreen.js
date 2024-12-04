@@ -17,62 +17,75 @@ const QuizTap = () => {
   const {quizzes, setQuizzes, user, token, emulUrl} = useMainContext();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleLike = id => {
+  const handleLike = quizId => {
     if (isUpdating) {
       // 서버 업데이트 중엔 차단
       return;
     }
+    setIsUpdating(true);
+    // 좋아요 요청 (isLike: true)
+    const quiz = quizzes.find(q => q.id === quizId);
+    const userLiked = quiz.likes.some(like => like.id === user.id);
+
+    // 서버 업데이트 요청
+    updateQuizLikesOnServer(quizId, true).finally(() => setIsUpdating(false));
 
     setQuizzes(prevQuizzes =>
-      prevQuizzes.map(quiz => {
-        if (quiz.id === id) {
-          const hasLiked = quiz.likes.includes(user.id);
-          const updatedLikes = hasLiked
-            ? quiz.likes.filter(uid => uid !== user.id) // 좋아요 취소
-            : [...quiz.likes, user.id]; // 좋아요 추가
-          const updatedDislikes = quiz.dislikes.filter(uid => uid !== user.id); // 싫어요 취소
-          updateQuizLikesOnServer(id, updatedLikes, updatedDislikes).finally(
-            () => setIsUpdating(false),
-          ); // 서버 응답 후에 상태 재설정
-          return {...quiz, likes: updatedLikes, dislikes: updatedDislikes};
+      prevQuizzes.map(q => {
+        if (q.id === quizId) {
+          return {
+            ...q,
+            likes: userLiked
+              ? q.likes.filter(like => like.id !== user.id) // 좋아요 취소
+              : [...q.likes, {id: user.id, userName: user.userName}], // 좋아요 추가
+            dislikes: q.dislikes.filter(dislike => dislike.id !== user.id), // 싫어요 제거
+          };
         }
-        return quiz;
+        return q;
       }),
     );
   };
 
-  const handleDislike = id => {
+  const handleDislike = quizId => {
     if (isUpdating) {
       // 서버 업데이트 중엔 차단
       return;
     }
+    setIsUpdating(true);
+
+    const quiz = quizzes.find(q => q.id === quizId);
+    const userDisliked = quiz.dislikes.some(dislike => dislike.id === user.id);
+
+    // 서버 업데이트 요청
+    updateQuizLikesOnServer(quizId, false).finally(() => setIsUpdating(false));
 
     setQuizzes(prevQuizzes =>
-      prevQuizzes.map(quiz => {
-        if (quiz.id === id) {
-          const hasDisliked = quiz.dislikes.includes(user.id);
-          const updatedDislikes = hasDisliked
-            ? quiz.dislikes.filter(uid => uid !== user.id) // 싫어요 취소
-            : [...quiz.dislikes, user.id]; // 싫어요 추가
-          const updatedLikes = quiz.likes.filter(uid => uid !== user.id); // 좋아요 취소
-          updateQuizLikesOnServer(id, updatedLikes, updatedDislikes).finally(
-            () => setIsUpdating(false),
-          );
-          return {...quiz, dislikes: updatedDislikes, likes: updatedLikes};
+      prevQuizzes.map(q => {
+        if (q.id === quizId) {
+          return {
+            ...q,
+            dislikes: userDisliked
+              ? q.dislikes.filter(dislike => dislike.id !== user.id) // 싫어요 취소
+              : [...q.dislikes, {id: user.id, userName: user.userName}], // 싫어요 추가
+            likes: q.likes.filter(like => like.id !== user.id), // 좋아요 제거
+          };
         }
-        return quiz;
+        return q;
       }),
     );
   };
-  const updateQuizLikesOnServer = async (id, likes, dislikes) => {
+  const updateQuizLikesOnServer = async (quizId, isLike) => {
     try {
-      const response = await fetch(`${emulUrl}/quizzes/${id}/reactions`, {
+      const response = await fetch(`${emulUrl}/quizzes/${quizId}/react`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({likes, dislikes}),
+        body: JSON.stringify({
+          userId: user.id, // 현재 사용자 ID 전송
+          isLike: isLike, // 좋아요 여부
+        }),
       });
       if (!response.ok) {
         throw new Error('서버와의 동기화에 실패했습니다.');
@@ -84,9 +97,7 @@ const QuizTap = () => {
 
   const sortByDate = () => {
     setQuizzes(prevQuizzes =>
-      [...prevQuizzes].sort((a, b) => {
-        return new Date(b.date) - new Date(a.date);
-      }),
+      [...prevQuizzes].sort((a, b) => new Date(b.date) - new Date(a.date)),
     );
   };
 
@@ -102,8 +113,10 @@ const QuizTap = () => {
   };
 
   const renderItem = ({item}) => {
-    const userLiked = item.likes.includes(user.id);
-    const userDisliked = item.dislikes.includes(user.id);
+    // 현재 사용자가 좋아요 또는 싫어요를 눌렀는지 확인
+    const userLiked = item.likes.some(like => like.id === user.id);
+    const userDisliked = item.dislikes.some(dislike => dislike.id === user.id);
+
     return (
       <View style={styles.quizItem}>
         <View style={styles.quizHeader}>

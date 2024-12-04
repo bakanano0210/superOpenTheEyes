@@ -30,7 +30,7 @@ const HomeScreen = ({route, navigation}) => {
   const [selectedItem, setSelectedItem] = useState(null); // 선택 과목 정보
   const [totalTime, setTotalTime] = useState(0);
   const lastUpdatedParams = useRef(null);
-
+  console.log(token);
   const handleDelete = id => {
     Alert.alert('삭제', '해당 과목을 삭제하시겠습니까?', [
       {text: '취소', style: 'cancel'},

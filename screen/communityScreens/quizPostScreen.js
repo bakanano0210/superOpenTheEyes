@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useMainContext} from '../../component/mainContext';
-import {CustomButton} from '../../component/custom';
+import {CustomButton, formatDate} from '../../component/custom';
 
 const QuizPostScreen = ({route}) => {
   const {setQuizzes, token, user, emulUrl} = useMainContext();
@@ -25,13 +25,10 @@ const QuizPostScreen = ({route}) => {
     const newQuiz = {
       question,
       answer,
-      date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      date: formatDate(),
       userId: user.id,
-      userName: user.userName,
-      likes: [],
-      dislikes: [],
-      userLiked: false,
-      userDisliked: false,
+      likes: [], // 빈 배열로 초기화
+      dislikes: [], // 빈 배열로 초기화
     };
     try {
       const response = await fetch(`${emulUrl}/quizzes`, {
