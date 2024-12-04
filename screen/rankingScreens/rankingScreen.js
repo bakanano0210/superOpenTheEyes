@@ -24,7 +24,7 @@ const formatDate = () => {
 };
 
 const DailyRankingTap = ({data}) => {
-  const {user, emulUrl} = useMainContext();
+  const {user, serverUrl} = useMainContext();
   // 데이터 정렬 및 랭킹 추가
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
@@ -32,7 +32,7 @@ const DailyRankingTap = ({data}) => {
       <Image
         source={
           item.profileImageUri
-            ? {uri: `${emulUrl}${item.profileImageUri}`}
+            ? {uri: `${serverUrl}${item.profileImageUri}`}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"
@@ -62,7 +62,7 @@ const DailyRankingTap = ({data}) => {
   );
 };
 const GroupRankingTap = ({data}) => {
-  const {user, emulUrl} = useMainContext();
+  const {user, serverUrl} = useMainContext();
   // 그룹별로 데이터를 분류하고 시간 총합 계산
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
@@ -70,7 +70,7 @@ const GroupRankingTap = ({data}) => {
       <Image
         source={
           item.imageUri
-            ? {uri: `${emulUrl}${item.imageUri}`}
+            ? {uri: `${serverUrl}${item.imageUri}`}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"
@@ -103,7 +103,7 @@ const GroupRankingTap = ({data}) => {
   );
 };
 const RankingInGroupTap = ({data}) => {
-  const {user, emulUrl} = useMainContext();
+  const {user, serverUrl} = useMainContext();
 
   const renderItem = ({item}) => (
     <View style={styles.rankItem}>
@@ -111,7 +111,7 @@ const RankingInGroupTap = ({data}) => {
       <Image
         source={
           item.profileImageUri
-            ? {uri: `${emulUrl}${item.profileImageUri}`}
+            ? {uri: `${serverUrl}${item.profileImageUri}`}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"

@@ -7,7 +7,7 @@ import {formatDate} from '../../component/custom';
 const NotificationDetailScreen = ({route}) => {
   const {item} = route.params;
   const navigation = useNavigation();
-  const {emulUrl, token} = useMainContext();
+  const {serverUrl, token} = useMainContext();
   console.log(item);
   const [isAccepting, setIsAccepting] = useState(false);
   const isAccepted = item.isAccepted ?? false; // 기본값
@@ -21,7 +21,7 @@ const NotificationDetailScreen = ({route}) => {
   const handleAcceptMentorRequest = async () => {
     setIsAccepting(true);
     try {
-      const response = await fetch(`${emulUrl}/mentor-relationships/create`, {
+      const response = await fetch(`${serverUrl}/mentor-relationships/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ const NotificationDetailScreen = ({route}) => {
   const handleAccept = async () => {
     try {
       const response = await fetch(
-        `${emulUrl}/notifications/${item.id}/accept`,
+        `${serverUrl}/notifications/${item.id}/accept`,
         {
           method: 'PATCH',
           headers: {

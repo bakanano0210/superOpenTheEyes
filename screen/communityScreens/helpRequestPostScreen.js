@@ -16,7 +16,7 @@ import {CustomButton, formatDate} from '../../component/custom';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const HelpRequestPostScreen = ({navigation}) => {
-  const {setHelpRequests, user, token, emulUrl} = useMainContext();
+  const {setHelpRequests, user, token, serverUrl} = useMainContext();
   const route = useRoute();
   const {currentPost} = route.params || {};
   const [title, setTitle] = useState();
@@ -87,7 +87,7 @@ const HelpRequestPostScreen = ({navigation}) => {
     };
 
     const createResponse = await fetch(
-      `${emulUrl}/help-requests?userId=${user.id}`,
+      `${serverUrl}/help-requests?userId=${user.id}`,
       {
         method: 'POST',
         headers: {
@@ -131,14 +131,17 @@ const HelpRequestPostScreen = ({navigation}) => {
       uri => !uploadedImageUris.includes(uri),
     );
     if (removedUris.length > 0) {
-      await fetch(`${emulUrl}/help-requests/${currentPost.id}/delete-images`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      await fetch(
+        `${serverUrl}/help-requests/${currentPost.id}/delete-images`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({uris: removedUris}),
         },
-        body: JSON.stringify({uris: removedUris}),
-      });
+      );
     }
 
     // 게시물 업데이트
@@ -151,7 +154,7 @@ const HelpRequestPostScreen = ({navigation}) => {
     console.log(updatedPostPayload);
 
     const updateResponse = await fetch(
-      `${emulUrl}/help-requests/${currentPost.id}?userId=${user.id}`,
+      `${serverUrl}/help-requests/${currentPost.id}?userId=${user.id}`,
       {
         method: 'PUT',
         headers: {
@@ -197,7 +200,7 @@ const HelpRequestPostScreen = ({navigation}) => {
 
     try {
       const response = await fetch(
-        `${emulUrl}/help-requests/${currentPost.id}/upload-image`,
+        `${serverUrl}/help-requests/${currentPost.id}/upload-image`,
         {
           method: 'POST',
           headers: {
@@ -255,7 +258,7 @@ const HelpRequestPostScreen = ({navigation}) => {
                 source={{
                   uri: uri.startsWith('file://')
                     ? `${uri}`
-                    : `${emulUrl}${uri}`,
+                    : `${serverUrl}${uri}`,
                 }}
                 style={styles.previewImage}
               />

@@ -13,12 +13,12 @@ const {width} = Dimensions.get('window');
 
 const NotificationScreen = ({navigation}) => {
   const [notifications, setNotifications] = useState([]);
-  const {emulUrl, user, token} = useMainContext();
+  const {serverUrl, user, token} = useMainContext();
   console.log(token);
   const fetchNotifications = async () => {
     try {
       const response = await fetch(
-        `${emulUrl}/notifications?userId=${user.id}`,
+        `${serverUrl}/notifications?userId=${user.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +43,7 @@ const NotificationScreen = ({navigation}) => {
   const handleNotificationPress = async item => {
     try {
       // 서버에 읽음 상태 업데이트 요청
-      const response = await fetch(`${emulUrl}/notifications/${item.id}`, {
+      const response = await fetch(`${serverUrl}/notifications/${item.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

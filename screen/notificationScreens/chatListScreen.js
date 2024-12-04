@@ -3,7 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
 import {useMainContext} from '../../component/mainContext';
 import {useIsFocused} from '@react-navigation/native';
 const ChatListScreen = ({navigation}) => {
-  const {token, user, emulUrl, chatRooms, setChatRooms} = useMainContext();
+  const {token, user, serverUrl, chatRooms, setChatRooms} = useMainContext();
   const isFocused = useIsFocused(); // 현재 화면이 focus되었는지 확인
 
   // 화면이 활성화될 때마다 데이터 새로고침
@@ -14,7 +14,7 @@ const ChatListScreen = ({navigation}) => {
   }, [isFocused]);
   const fetchChatRooms = async () => {
     try {
-      const response = await fetch(`${emulUrl}/chat-rooms/user/${user.id}`, {
+      const response = await fetch(`${serverUrl}/chat-rooms/user/${user.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

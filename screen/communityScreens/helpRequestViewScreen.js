@@ -22,7 +22,7 @@ import {formatDate} from '../../component/custom';
 const {width, height} = Dimensions.get('window');
 
 const HelpRequestViewScreen = ({navigation}) => {
-  const {setHelpRequests, user, token, emulUrl} = useMainContext();
+  const {setHelpRequests, user, token, serverUrl} = useMainContext();
   const route = useRoute();
   const [currentPost, setCurrentPost] = useState(route.params.post);
   const {comments, setComments} = useMainContext();
@@ -60,7 +60,7 @@ const HelpRequestViewScreen = ({navigation}) => {
           onPress: async () => {
             try {
               const response = await fetch(
-                `${emulUrl}/mentor-relationships/request`,
+                `${serverUrl}/mentor-relationships/request`,
                 {
                   method: 'POST',
                   headers: {
@@ -93,7 +93,7 @@ const HelpRequestViewScreen = ({navigation}) => {
   const checkMentorRelationship = async () => {
     try {
       const response = await fetch(
-        `${emulUrl}/mentor-relationships/check?${queryParams}`,
+        `${serverUrl}/mentor-relationships/check?${queryParams}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -161,7 +161,7 @@ const HelpRequestViewScreen = ({navigation}) => {
       {currentPost.uri.map((uri, index) => (
         <Image
           key={index}
-          source={{uri: `${emulUrl}${uri}`}}
+          source={{uri: `${serverUrl}${uri}`}}
           style={styles.postImage}
         />
       ))}
@@ -184,7 +184,7 @@ const HelpRequestViewScreen = ({navigation}) => {
         onPress: async () => {
           try {
             const response = await fetch(
-              `${emulUrl}/help-requests/${currentPost.id}`,
+              `${serverUrl}/help-requests/${currentPost.id}`,
               {
                 method: 'DELETE',
                 headers: {
@@ -213,7 +213,7 @@ const HelpRequestViewScreen = ({navigation}) => {
   const fetchPostDetails = async () => {
     try {
       const response = await fetch(
-        `${emulUrl}/help-requests/${currentPost.id}`,
+        `${serverUrl}/help-requests/${currentPost.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -240,7 +240,7 @@ const HelpRequestViewScreen = ({navigation}) => {
       try {
         if (editingCommentId) {
           const response = await fetch(
-            `${emulUrl}/comments/${editingCommentId}`,
+            `${serverUrl}/comments/${editingCommentId}`,
             {
               method: 'PUT',
               headers: {
@@ -266,7 +266,7 @@ const HelpRequestViewScreen = ({navigation}) => {
           );
           setEditingCommentId(null);
         } else {
-          const response = await fetch(`${emulUrl}/comments`, {
+          const response = await fetch(`${serverUrl}/comments`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -290,7 +290,7 @@ const HelpRequestViewScreen = ({navigation}) => {
 
           // 서버로 post의 comments 증가 요청
           await fetch(
-            `${emulUrl}/help-requests/${currentPost.id}/increment-comments`,
+            `${serverUrl}/help-requests/${currentPost.id}/increment-comments`,
             {
               method: 'PATCH',
               headers: {
@@ -328,12 +328,15 @@ const HelpRequestViewScreen = ({navigation}) => {
         text: '삭제',
         onPress: async () => {
           try {
-            const response = await fetch(`${emulUrl}/comments/${comment.id}`, {
-              method: 'DELETE',
-              headers: {
-                Authorization: `Bearer ${token}`, // 인증 토큰 추가
+            const response = await fetch(
+              `${serverUrl}/comments/${comment.id}`,
+              {
+                method: 'DELETE',
+                headers: {
+                  Authorization: `Bearer ${token}`, // 인증 토큰 추가
+                },
               },
-            });
+            );
 
             if (!response.ok) {
               throw new Error('댓글 삭제에 실패했습니다.');
@@ -343,7 +346,7 @@ const HelpRequestViewScreen = ({navigation}) => {
 
             // 서버로 post의 comments 감소 요청
             await fetch(
-              `${emulUrl}/help-requests/${currentPost.id}/decrement-comments`,
+              `${serverUrl}/help-requests/${currentPost.id}/decrement-comments`,
               {
                 method: 'PATCH',
                 headers: {
@@ -373,7 +376,7 @@ const HelpRequestViewScreen = ({navigation}) => {
   const fetchComments = async () => {
     try {
       const response = await fetch(
-        `${emulUrl}/comments?postId=${currentPost.id}`,
+        `${serverUrl}/comments?postId=${currentPost.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

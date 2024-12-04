@@ -22,7 +22,7 @@ const {width, height} = Dimensions.get('window');
 
 const StudyScreen = ({route, navigation}) => {
   const {subject} = route.params;
-  const {emulUrl, token} = useMainContext();
+  const {serverUrl, token} = useMainContext();
 
   const [hasPermission, setHasPermission] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -73,7 +73,7 @@ const StudyScreen = ({route, navigation}) => {
   // 퀴즈 데이터 가져오기
   const fetchQuiz = async () => {
     try {
-      const response = await fetch(`${emulUrl}/quizzes/top`, {
+      const response = await fetch(`${serverUrl}/quizzes/top`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

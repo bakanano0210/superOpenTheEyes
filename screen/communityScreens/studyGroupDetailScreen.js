@@ -33,7 +33,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
     studyGroups,
     setStudyGroups,
     token,
-    emulUrl,
+    serverUrl,
     rankedGroup,
   } = useMainContext();
   const [members, setMembers] = useState([]);
@@ -50,7 +50,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
     const fetchGroupMembers = async () => {
       try {
         const response = await fetch(
-          `${emulUrl}/study-groups/${info.id}/members`,
+          `${serverUrl}/study-groups/${info.id}/members`,
           {
             headers: {
               'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
       <Image
         source={
           item.profileImageUri
-            ? {uri: `${emulUrl}${item.profileImageUri}`}
+            ? {uri: `${serverUrl}${item.profileImageUri}`}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"
@@ -104,13 +104,16 @@ const StudyGroupDetailScreen = ({navigation}) => {
   // 그룹 탈퇴 처리
   const handleLeaveGroup = async () => {
     try {
-      const response = await fetch(`${emulUrl}/study-groups/${info.id}/leave`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${serverUrl}/study-groups/${info.id}/leave`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
         const message = await response.text();
@@ -151,13 +154,16 @@ const StudyGroupDetailScreen = ({navigation}) => {
     }
 
     try {
-      const response = await fetch(`${emulUrl}/study-groups/${info.id}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${serverUrl}/study-groups/${info.id}/join`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
         const updatedUser = await response.json();

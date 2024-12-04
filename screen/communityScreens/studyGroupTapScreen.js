@@ -24,7 +24,7 @@ const StudyGroupTap = ({
   setIsEditMode,
   navigation,
 }) => {
-  const {token, emulUrl} = useMainContext();
+  const {token, serverUrl} = useMainContext();
   const [selectedGroup, setSelectedGroup] = useState({
     id: '',
     leaderId: '',
@@ -70,7 +70,7 @@ const StudyGroupTap = ({
 
     try {
       const uploadResponse = await fetch(
-        `${emulUrl}/study-groups/${groupId}/upload-group-image`,
+        `${serverUrl}/study-groups/${groupId}/upload-group-image`,
         {
           method: 'POST',
           headers: {
@@ -109,7 +109,7 @@ const StudyGroupTap = ({
         text: '삭제',
         onPress: async () => {
           try {
-            const response = await fetch(`${emulUrl}/study-groups/${id}`, {
+            const response = await fetch(`${serverUrl}/study-groups/${id}`, {
               method: 'DELETE',
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -154,7 +154,7 @@ const StudyGroupTap = ({
       };
       try {
         const response = await fetch(
-          `${emulUrl}/study-groups/${selectedGroup.id}`,
+          `${serverUrl}/study-groups/${selectedGroup.id}`,
           {
             method: 'PUT',
             headers: {
@@ -209,7 +209,7 @@ const StudyGroupTap = ({
         limit: newGroupLimit,
       };
       try {
-        const response = await fetch(`${emulUrl}/study-groups`, {
+        const response = await fetch(`${serverUrl}/study-groups`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -270,7 +270,7 @@ const StudyGroupTap = ({
             <Image
               source={
                 item.imageUri
-                  ? {uri: `${emulUrl}${item.imageUri}`}
+                  ? {uri: `${serverUrl}${item.imageUri}`}
                   : require('../../assets/exampleImg.png')
               }
               resizeMode="contain"

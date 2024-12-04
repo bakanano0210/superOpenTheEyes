@@ -16,12 +16,12 @@ import {ChatRoomRightHeader} from '../../component/header';
 const ChatRoomScreen = ({route, navigation}) => {
   const {chatRoom} = route.params;
   const [newMessage, setNewMessage] = useState('');
-  const {token, user, emulUrl, messages, setMessages} = useMainContext();
+  const {token, user, serverUrl, messages, setMessages} = useMainContext();
   const flatListRef = useRef(null);
   const onMentoringEnd = async () => {
     try {
       const response = await fetch(
-        `${emulUrl}/mentor-relationships/${chatRoom.mentorRelationshipId}/end`,
+        `${serverUrl}/mentor-relationships/${chatRoom.mentorRelationshipId}/end`,
         {
           method: 'DELETE',
           headers: {
@@ -50,7 +50,7 @@ const ChatRoomScreen = ({route, navigation}) => {
     const fetchMessages = async () => {
       try {
         const response = await fetch(
-          `${emulUrl}/messages/chat-room/${chatRoom.id}?userId=${user.id}`,
+          `${serverUrl}/messages/chat-room/${chatRoom.id}?userId=${user.id}`,
           {
             headers: {Authorization: `Bearer ${token}`},
           },
@@ -91,7 +91,7 @@ const ChatRoomScreen = ({route, navigation}) => {
     Keyboard.dismiss();
     flatListRef.current?.scrollToEnd({animated: true});
     try {
-      const response = await fetch(`${emulUrl}/messages/send`, {
+      const response = await fetch(`${serverUrl}/messages/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

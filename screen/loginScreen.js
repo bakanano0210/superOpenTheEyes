@@ -34,7 +34,7 @@ const LoginScreen = ({navigation}) => {
     fetchHelpRequests,
     fetchQuizzes,
     fetchRankingData,
-    emulUrl,
+    serverUrl,
     fetchNotifications,
   } = useMainContext();
   const fetchingFunction = async () => {
@@ -63,7 +63,7 @@ const LoginScreen = ({navigation}) => {
       const token = await AsyncStorage.getItem('token');
       const remember = await AsyncStorage.getItem('rememberMe'); // "로그인 유지" 상태 확인
       if (token && remember === 'true') {
-        const response = await fetch(`${emulUrl}/users/validate`, {
+        const response = await fetch(`${serverUrl}/users/validate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const LoginScreen = ({navigation}) => {
   const login = async (userEmail, password) => {
     console.log('loginTocuhed!');
     try {
-      const response = await fetch(`${emulUrl}/users/login`, {
+      const response = await fetch(`${serverUrl}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

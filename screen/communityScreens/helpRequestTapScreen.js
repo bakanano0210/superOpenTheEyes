@@ -11,7 +11,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMainContext} from '../../component/mainContext';
 
 const HelpRequestTap = ({navigation}) => {
-  const {helpRequests, emulUrl} = useMainContext();
+  const {helpRequests, serverUrl} = useMainContext();
   // {
   //   id: '2',
   //   title: '어디가 틀린건가요ㅠㅠㅠㅠ',

@@ -20,7 +20,7 @@ const ProfileScreen = ({navigation}) => {
     rankedInGroup,
     studyGroups,
     token,
-    emulUrl,
+    serverUrl,
   } = useMainContext();
   const userDailyRank =
     rankedDaily?.find(item => item.userName === user.userName) || null;
@@ -47,7 +47,7 @@ const ProfileScreen = ({navigation}) => {
           });
           try {
             const uploadResponse = await fetch(
-              `${emulUrl}/users/upload-profile-image`,
+              `${serverUrl}/users/upload-profile-image`,
               {
                 method: 'POST',
                 headers: {
@@ -87,9 +87,12 @@ const ProfileScreen = ({navigation}) => {
   useEffect(() => {
     const fetchContinuousAttendanceDays = async () => {
       try {
-        const response = await fetch(`${emulUrl}/study/continuous-attendance`, {
-          headers: {Authorization: `Bearer ${token}`}, // 인증 헤더 추가
-        });
+        const response = await fetch(
+          `${serverUrl}/study/continuous-attendance`,
+          {
+            headers: {Authorization: `Bearer ${token}`}, // 인증 헤더 추가
+          },
+        );
         if (response.ok) {
           const days = await response.json();
           setContinuousDays(days); // 연속 출석 일수 설정
@@ -117,14 +120,14 @@ const ProfileScreen = ({navigation}) => {
       }
     }
   }, [user, studyGroups]); // data와 studyGroups가 변경될 때만 실행
-  console.log(`${emulUrl}${user.profileImageUri}`);
+  console.log(`${serverUrl}${user.profileImageUri}`);
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.profileView} onPress={handleChoosePhoto}>
         <Image
           source={
             user.profileImageUri
-              ? {uri: `${emulUrl}${user.profileImageUri}`}
+              ? {uri: `${serverUrl}${user.profileImageUri}`}
               : require('../assets/exampleImg.png')
           }
           resizeMode="contain"

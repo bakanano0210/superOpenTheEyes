@@ -25,7 +25,7 @@ export const SubjectModal = ({
   editingKey = null,
 }) => {
   const [subjectTitle, setSubjectTitle] = useState('');
-  const {token, emulUrl} = useMainContext();
+  const {token, serverUrl} = useMainContext();
   useEffect(() => {
     if (visible) {
       setSubjectTitle(isEdit ? initialTitle : '');
@@ -53,7 +53,7 @@ export const SubjectModal = ({
           item => item.id === editingKey,
         );
         // 서버에 과목 수정 요청
-        const response = await fetch(`${emulUrl}/subjects/${editingKey}`, {
+        const response = await fetch(`${serverUrl}/subjects/${editingKey}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export const SubjectModal = ({
         }
       } else {
         // 서버에 과목 추가 요청
-        const response = await fetch(`${emulUrl}/subjects`, {
+        const response = await fetch(`${serverUrl}/subjects`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

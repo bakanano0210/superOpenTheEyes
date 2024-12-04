@@ -15,7 +15,7 @@ const MessageWriteScreen = ({navigation}) => {
   const [title, setTitle] = useState('');
   const [recipient, setRecipient] = useState('');
   const [content, setContent] = useState('');
-  const {emulUrl, token, user} = useMainContext();
+  const {serverUrl, token, user} = useMainContext();
   const route = useRoute();
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const MessageWriteScreen = ({navigation}) => {
     }
 
     try {
-      const response = await fetch(`${emulUrl}/notifications/send-message`, {
+      const response = await fetch(`${serverUrl}/notifications/send-message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

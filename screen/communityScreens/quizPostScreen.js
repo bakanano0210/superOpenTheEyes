@@ -11,7 +11,7 @@ import {useMainContext} from '../../component/mainContext';
 import {CustomButton, formatDate} from '../../component/custom';
 
 const QuizPostScreen = ({route}) => {
-  const {setQuizzes, token, user, emulUrl} = useMainContext();
+  const {setQuizzes, token, user, serverUrl} = useMainContext();
   const navigation = useNavigation();
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -31,7 +31,7 @@ const QuizPostScreen = ({route}) => {
       dislikes: [], // 빈 배열로 초기화
     };
     try {
-      const response = await fetch(`${emulUrl}/quizzes`, {
+      const response = await fetch(`${serverUrl}/quizzes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

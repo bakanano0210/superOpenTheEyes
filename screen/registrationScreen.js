@@ -20,7 +20,7 @@ const RegistrationScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const {emulUrl} = useMainContext();
+  const {serverUrl} = useMainContext();
   // 쿼리 파라미터 생성
   const queryParams = new URLSearchParams({
     verificationCode: verificationCode,
@@ -34,13 +34,16 @@ const RegistrationScreen = ({navigation}) => {
       return;
     }
     try {
-      const response = await fetch(`${emulUrl}/users/send-verification-code`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${serverUrl}/users/send-verification-code`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({email}),
         },
-        body: JSON.stringify({email}),
-      });
+      );
 
       if (response.ok) {
         setIsCodeSent(true);
@@ -66,7 +69,7 @@ const RegistrationScreen = ({navigation}) => {
     }
     try {
       const response = await fetch(
-        `${emulUrl}/users/verify-code-register?${queryParams}`,
+        `${serverUrl}/users/verify-code-register?${queryParams}`,
         {
           method: 'POST',
           headers: {

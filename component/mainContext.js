@@ -5,8 +5,7 @@ import {Alert} from 'react-native';
 const MainContext = createContext();
 
 export const MainProvider = ({children}) => {
-  const emulUrl = 'http://10.0.2.2:8082';
-  const realUrl = 'http://192.168.200.195:8082';
+  const serverUrl = 'https://supereyeopen-1.onrender.com';
   const [menuVisible, setMenuVisible] = useState(false);
   const [studyGroups, setStudyGroups] = useState([
     // {
@@ -35,7 +34,7 @@ export const MainProvider = ({children}) => {
       return;
     }
     try {
-      const response = await fetch(`${emulUrl}/study-groups`, {
+      const response = await fetch(`${serverUrl}/study-groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +54,7 @@ export const MainProvider = ({children}) => {
       return;
     }
     try {
-      const response = await fetch(`${emulUrl}/help-requests`, {
+      const response = await fetch(`${serverUrl}/help-requests`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -179,7 +178,7 @@ export const MainProvider = ({children}) => {
       return;
     }
     try {
-      const response = await fetch(`${emulUrl}/quizzes`, {
+      const response = await fetch(`${serverUrl}/quizzes`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -207,14 +206,14 @@ export const MainProvider = ({children}) => {
     }
     try {
       // Fetch daily ranking
-      const dailyResponse = await fetch(`${emulUrl}/rankings/daily`, {
+      const dailyResponse = await fetch(`${serverUrl}/rankings/daily`, {
         headers: {Authorization: `Bearer ${token}`},
       });
       const dailyData = await dailyResponse.json();
       setRankedDaily(dailyData);
 
       // Fetch group ranking
-      const groupResponse = await fetch(`${emulUrl}/rankings/groups`, {
+      const groupResponse = await fetch(`${serverUrl}/rankings/groups`, {
         headers: {Authorization: `Bearer ${token}`},
       });
       const groupData = await groupResponse.json();
@@ -223,7 +222,7 @@ export const MainProvider = ({children}) => {
       // Fetch in-group ranking
       if (user?.studyGroupId) {
         const inGroupResponse = await fetch(
-          `${emulUrl}/rankings/group/${user.studyGroupId}`,
+          `${serverUrl}/rankings/group/${user.studyGroupId}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
         const inGroupData = await inGroupResponse.json();
@@ -240,7 +239,7 @@ export const MainProvider = ({children}) => {
         throw new Error('사용자 ID가 유효하지 않습니다.');
       }
       const response = await fetch(
-        `${emulUrl}/notifications?userId=${userId}`,
+        `${serverUrl}/notifications?userId=${userId}`,
         {
           method: 'GET',
           headers: {
@@ -288,7 +287,7 @@ export const MainProvider = ({children}) => {
         fetchHelpRequests,
         fetchQuizzes,
         fetchRankingData,
-        emulUrl,
+        serverUrl,
         realUrl,
         notifications,
         setNotifications,
