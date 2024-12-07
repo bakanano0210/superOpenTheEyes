@@ -9,6 +9,7 @@ import StudyGroupTap from './studyGroupTapScreen';
 import HelpRequestTap from './helpRequestTapScreen';
 import QuizTap from './quizTapScreen';
 import {customRenderTabBar} from '../../component/header';
+import {useMainContext} from '../../component/mainContext';
 
 const CommunityHomeScreen = () => {
   const communityRoute = useRoute();
@@ -18,9 +19,19 @@ const CommunityHomeScreen = () => {
   const [index, setIndex] = useState(initialIndex);
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const {fetchStudyGroups, fetchHelpRequests, fetchQuizzes} = useMainContext();
   useEffect(() => {
     setIndex(initialIndex);
   }, [initialIndex]);
+  useEffect(() => {
+    fetchStudyGroups();
+    fetchHelpRequests();
+    fetchQuizzes();
+    // 주기적으로 데이터 가져오기 (15초마다)
+    const intervalId = setInterval(fetchQuizzes, 15000);
+
+    return () => clearInterval(intervalId); // 컴포넌트 언마운트 시 타이머 정리
+  }, []);
   const [routes] = useState([
     {key: 'first', title: '스터디그룹'},
     {key: 'second', title: '도움 요청'},

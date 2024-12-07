@@ -11,7 +11,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMainContext} from '../../component/mainContext';
 
 const HelpRequestTap = ({navigation}) => {
-  const {helpRequests, serverUrl} = useMainContext();
+  const {helpRequests} = useMainContext();
   // {
   //   id: '2',
   //   title: '어디가 틀린건가요ㅠㅠㅠㅠ',
@@ -25,7 +25,6 @@ const HelpRequestTap = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
   const [filteredHelpRequests, setFilteredHelpRequests] =
     useState(helpRequests);
-  console.log(filteredHelpRequests);
   useEffect(() => {
     const filtered = helpRequests
       .filter(post =>

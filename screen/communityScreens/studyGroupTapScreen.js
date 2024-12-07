@@ -24,7 +24,7 @@ const StudyGroupTap = ({
   setIsEditMode,
   navigation,
 }) => {
-  const {token, serverUrl} = useMainContext();
+  const {user, setUser, token, serverUrl} = useMainContext();
   const [selectedGroup, setSelectedGroup] = useState({
     id: '',
     leaderId: '',
@@ -39,9 +39,6 @@ const StudyGroupTap = ({
   const [imageUri, setImageUri] = useState('');
   const [searchText, setSearchText] = useState('');
   const [filteredGroups, setFilteredGroups] = useState(studyGroups);
-  const {user, setUser} = useMainContext();
-  console.log('studyGroups');
-  console.log(studyGroups);
   const handleChoosePhoto = () => {
     launchImageLibrary(
       {
@@ -270,7 +267,7 @@ const StudyGroupTap = ({
             <Image
               source={
                 item.imageUri
-                  ? {uri: `${serverUrl}${item.imageUri}`}
+                  ? {uri: item.imageUri}
                   : require('../../assets/exampleImg.png')
               }
               resizeMode="contain"
@@ -329,7 +326,9 @@ const StudyGroupTap = ({
                 <View style={styles.modalHeader}>
                   <View style={styles.iconPlaceholder}>
                     <TouchableOpacity onPress={handleChoosePhoto}>
-                      {imageUri === '' ? (
+                      {console.log('imageUri')}
+                      {console.log(imageUri)}
+                      {imageUri === null ? (
                         <Ionicons name="image" size={48} color="#014099" />
                       ) : (
                         <Image

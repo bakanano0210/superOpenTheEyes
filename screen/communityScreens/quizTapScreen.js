@@ -14,9 +14,13 @@ import {useMainContext} from '../../component/mainContext';
 const {width, height} = Dimensions.get('window');
 
 const QuizTap = () => {
-  const {quizzes, setQuizzes, user, token, serverUrl} = useMainContext();
+  const {quizzes, setQuizzes, user, token, serverUrl, fetchQuizzes} =
+    useMainContext();
   const [isUpdating, setIsUpdating] = useState(false);
-
+  console.log(quizzes);
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
   const handleLike = quizId => {
     if (isUpdating) {
       // 서버 업데이트 중엔 차단
@@ -25,7 +29,7 @@ const QuizTap = () => {
     setIsUpdating(true);
     // 좋아요 요청 (isLike: true)
     const quiz = quizzes.find(q => q.id === quizId);
-    const userLiked = quiz.likes.some(like => like.id === user.id);
+    const userLiked = quiz.likes.some(like => like === user.id);
 
     // 서버 업데이트 요청
     updateQuizLikesOnServer(quizId, true).finally(() => setIsUpdating(false));
@@ -36,9 +40,9 @@ const QuizTap = () => {
           return {
             ...q,
             likes: userLiked
-              ? q.likes.filter(like => like.id !== user.id) // 좋아요 취소
-              : [...q.likes, {id: user.id, userName: user.userName}], // 좋아요 추가
-            dislikes: q.dislikes.filter(dislike => dislike.id !== user.id), // 싫어요 제거
+              ? q.likes.filter(like => like !== user.id) // 좋아요 취소
+              : [...q.likes, user.id], // 좋아요 추가
+            dislikes: q.dislikes.filter(dislike => dislike !== user.id), // 싫어요 제거
           };
         }
         return q;
@@ -54,7 +58,7 @@ const QuizTap = () => {
     setIsUpdating(true);
 
     const quiz = quizzes.find(q => q.id === quizId);
-    const userDisliked = quiz.dislikes.some(dislike => dislike.id === user.id);
+    const userDisliked = quiz.dislikes.some(dislike => dislike === user.id);
 
     // 서버 업데이트 요청
     updateQuizLikesOnServer(quizId, false).finally(() => setIsUpdating(false));
@@ -65,9 +69,9 @@ const QuizTap = () => {
           return {
             ...q,
             dislikes: userDisliked
-              ? q.dislikes.filter(dislike => dislike.id !== user.id) // 싫어요 취소
-              : [...q.dislikes, {id: user.id, userName: user.userName}], // 싫어요 추가
-            likes: q.likes.filter(like => like.id !== user.id), // 좋아요 제거
+              ? q.dislikes.filter(dislike => dislike !== user.id) // 싫어요 취소
+              : [...q.dislikes, user.id], // 싫어요 추가
+            likes: q.likes.filter(like => like !== user.id), // 좋아요 제거
           };
         }
         return q;
@@ -114,8 +118,8 @@ const QuizTap = () => {
 
   const renderItem = ({item}) => {
     // 현재 사용자가 좋아요 또는 싫어요를 눌렀는지 확인
-    const userLiked = item.likes.some(like => like.id === user.id);
-    const userDisliked = item.dislikes.some(dislike => dislike.id === user.id);
+    const userLiked = item.likes.some(like => like === user.id);
+    const userDisliked = item.dislikes.some(dislike => dislike === user.id);
 
     return (
       <View style={styles.quizItem}>

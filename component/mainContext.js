@@ -5,7 +5,7 @@ import {Alert} from 'react-native';
 const MainContext = createContext();
 
 export const MainProvider = ({children}) => {
-  const serverUrl = 'https://supereyeopen-1.onrender.com';
+  const serverUrl = 'https://supereyeopen.onrender.com';
   const [menuVisible, setMenuVisible] = useState(false);
   const [studyGroups, setStudyGroups] = useState([
     // {
@@ -288,7 +288,6 @@ export const MainProvider = ({children}) => {
         fetchQuizzes,
         fetchRankingData,
         serverUrl,
-        realUrl,
         notifications,
         setNotifications,
         fetchNotifications,

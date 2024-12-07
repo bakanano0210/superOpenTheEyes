@@ -256,9 +256,7 @@ const HelpRequestPostScreen = ({navigation}) => {
               <Image
                 key={index}
                 source={{
-                  uri: uri.startsWith('file://')
-                    ? `${uri}`
-                    : `${serverUrl}${uri}`,
+                  uri: uri,
                 }}
                 style={styles.previewImage}
               />

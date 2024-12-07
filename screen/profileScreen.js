@@ -127,7 +127,7 @@ const ProfileScreen = ({navigation}) => {
         <Image
           source={
             user.profileImageUri
-              ? {uri: `${serverUrl}${user.profileImageUri}`}
+              ? {uri: user.profileImageUri}
               : require('../assets/exampleImg.png')
           }
           resizeMode="contain"

@@ -159,11 +159,7 @@ const HelpRequestViewScreen = ({navigation}) => {
       </View>
 
       {currentPost.uri.map((uri, index) => (
-        <Image
-          key={index}
-          source={{uri: `${serverUrl}${uri}`}}
-          style={styles.postImage}
-        />
+        <Image key={index} source={{uri: uri}} style={styles.postImage} />
       ))}
 
       {/* "댓글" 헤더 추가 */}

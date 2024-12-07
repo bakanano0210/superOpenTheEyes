@@ -32,7 +32,7 @@ const DailyRankingTap = ({data}) => {
       <Image
         source={
           item.profileImageUri
-            ? {uri: `${serverUrl}${item.profileImageUri}`}
+            ? {uri: item.profileImageUri}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"
@@ -70,7 +70,7 @@ const GroupRankingTap = ({data}) => {
       <Image
         source={
           item.imageUri
-            ? {uri: `${serverUrl}${item.imageUri}`}
+            ? {uri: item.imageUri}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"
@@ -111,7 +111,7 @@ const RankingInGroupTap = ({data}) => {
       <Image
         source={
           item.profileImageUri
-            ? {uri: `${serverUrl}${item.profileImageUri}`}
+            ? {uri: item.profileImageUri}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"

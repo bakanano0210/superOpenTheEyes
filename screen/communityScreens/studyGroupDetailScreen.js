@@ -91,7 +91,7 @@ const StudyGroupDetailScreen = ({navigation}) => {
       <Image
         source={
           item.profileImageUri
-            ? {uri: `${serverUrl}${item.profileImageUri}`}
+            ? {uri: item.profileImageUri}
             : require('../../assets/exampleImg.png')
         }
         resizeMode="contain"

@@ -1,4 +1,10 @@
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   Text,
@@ -18,6 +24,7 @@ const ChatRoomScreen = ({route, navigation}) => {
   const [newMessage, setNewMessage] = useState('');
   const {token, user, serverUrl, messages, setMessages} = useMainContext();
   const flatListRef = useRef(null);
+
   const onMentoringEnd = async () => {
     try {
       const response = await fetch(
@@ -45,26 +52,32 @@ const ChatRoomScreen = ({route, navigation}) => {
       headerRight: () => ChatRoomRightHeader({onMentoringEnd}),
     });
   }, [navigation]);
-  console.log(chatRoom);
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const response = await fetch(
-          `${serverUrl}/messages/chat-room/${chatRoom.id}?userId=${user.id}`,
-          {
-            headers: {Authorization: `Bearer ${token}`},
-          },
-        );
-        if (!response.ok) {
-          throw new Error('메시지를 가져올 수 없습니다.');
-        }
-        const data = await response.json();
-        setMessages(data);
-      } catch (error) {
-        console.error(error);
+  const fetchMessages = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${serverUrl}/messages/chat-room/${chatRoom.id}?userId=${user.id}`,
+        {
+          headers: {Authorization: `Bearer ${token}`},
+        },
+      );
+      if (!response.ok) {
+        throw new Error('메시지를 가져올 수 없습니다.');
       }
-    };
+      const data = await response.json();
+      setMessages(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [serverUrl, chatRoom.id, user.id, token, setMessages]);
+
+  useEffect(() => {
     fetchMessages();
+
+    // 15초마다 메시지 가져오기
+    const intervalId = setInterval(fetchMessages, 15000); // 15000ms = 15초
+
+    // 컴포넌트 언마운트 시 타이머 정리
+    return () => clearInterval(intervalId);
   }, [chatRoom.id]);
 
   const sendMessage = async () => {
@@ -127,12 +140,9 @@ const ChatRoomScreen = ({route, navigation}) => {
       );
     }
   };
+
   const renderMessage = ({item}) => {
-    console.log('item');
     const isMyMessage = item.isTemporary || item.senderId === user.id;
-    console.log(item);
-    console.log(user);
-    console.log(isMyMessage);
     return (
       <View
         style={[
