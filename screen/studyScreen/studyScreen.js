@@ -12,13 +12,28 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import {Camera, useCameraDevice} from 'react-native-vision-camera';
+import {
+  Camera,
+  useCameraDevice,
+  useFrameProcessor,
+  VisionCameraProxy,
+  Frame,
+} from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {formatTime} from '../../component/subject';
 import Sound from 'react-native-sound';
 import {useMainContext} from '../../component/mainContext';
+import {formatTime} from '../../component/subject';
 
 const {width, height} = Dimensions.get('window');
+const plugin = VisionCameraProxy.initFrameProcessorPlugin('processImage');
+
+function processImage(frame) {
+  'worklet';
+  if (plugin == null) {
+    throw new Error('Failed to load Frame Processor Plugin!');
+  }
+  return plugin.call(frame);
+}
 
 const StudyScreen = ({route, navigation}) => {
   const {subject} = route.params;
@@ -39,6 +54,12 @@ const StudyScreen = ({route, navigation}) => {
 
   const device = useCameraDevice('front');
   const alarmRef = useRef(null); // 알람 소리 관리
+  const frameProcessor = useFrameProcessor(frame => {
+    'worklet';
+    const result = processImage(frame);
+
+    console.log('Processed Frame:', result);
+  }, []);
 
   // 알람 재생
   const playAlarm = () => {
@@ -109,7 +130,7 @@ const StudyScreen = ({route, navigation}) => {
 
   // 집중하지 않은 상태 경고
   useEffect(() => {
-    if (unfocusedRef.current >= 5 && !alertRef.current) {
+    if (unfocusedRef.current >= 60 && !alertRef.current) {
       setIsAlertActive(true);
       alertRef.current = true;
       playAlarm();
@@ -226,6 +247,7 @@ const StudyScreen = ({route, navigation}) => {
           style={studyingStyles.cameraStyle}
           width={studyingStyles.cameraWidth}
           height={studyingStyles.cameraHeight}
+          frameProcessor={frameProcessor}
         />
       </SafeAreaView>
       <View style={{alignItems: 'center'}}>
