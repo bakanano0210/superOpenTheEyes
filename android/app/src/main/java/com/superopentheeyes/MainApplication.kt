@@ -11,6 +11,9 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 
+import org.opencv.android.OpenCVLoader
+import android.util.Log
+
 
 class MainApplication : Application(), ReactApplication {
 
@@ -38,7 +41,11 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
     SoLoader.init(this, false)
-
+    if (!OpenCVLoader.initDebug()) {
+            Log.e("OpenCV", "OpenCV initialization failed.")
+    } else {
+        Log.d("OpenCV", "OpenCV initialization succeeded.")
+    }
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()

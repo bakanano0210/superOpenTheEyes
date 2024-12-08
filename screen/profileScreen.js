@@ -120,7 +120,6 @@ const ProfileScreen = ({navigation}) => {
       }
     }
   }, [user, studyGroups]); // data와 studyGroups가 변경될 때만 실행
-  console.log(`${serverUrl}${user.profileImageUri}`);
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.profileView} onPress={handleChoosePhoto}>

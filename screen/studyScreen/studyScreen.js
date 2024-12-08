@@ -18,11 +18,14 @@ import {
   useFrameProcessor,
   VisionCameraProxy,
   Frame,
+  runAsync,
+  runAtTargetFps,
 } from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
 import {useMainContext} from '../../component/mainContext';
 import {formatTime} from '../../component/subject';
+import {useSharedValue} from 'react-native-worklets-core';
 
 const {width, height} = Dimensions.get('window');
 const plugin = VisionCameraProxy.initFrameProcessorPlugin('processImage');
@@ -54,13 +57,27 @@ const StudyScreen = ({route, navigation}) => {
 
   const device = useCameraDevice('front');
   const alarmRef = useRef(null); // 알람 소리 관리
+  const detectedFaces = useSharedValue([]);
+  console.log('detectedFaces');
+  console.log(detectedFaces);
   const frameProcessor = useFrameProcessor(frame => {
     'worklet';
-    const result = processImage(frame);
-
-    console.log('Processed Frame:', result);
+    // 프레임 처리 작업을 비동기로 실행
+    runAsync(frame, () => {
+      'worklet';
+      runAtTargetFps(
+        1,
+        () => {
+          'worklet';
+          const result = processImage(frame); // 네이티브 플러그인 호출
+          console.log('Eye detected:', result); // 결과 로그 출력
+          detectedFaces.value = result;
+        },
+        [],
+      );
+    });
   }, []);
-
+  runAtTargetFps(frameProcessor, 1);
   // 알람 재생
   const playAlarm = () => {
     if (!alarmRef.current) {

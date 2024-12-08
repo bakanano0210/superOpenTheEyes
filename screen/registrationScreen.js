@@ -6,6 +6,10 @@ import {
   Dimensions,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
 } from 'react-native';
 import {CustomButton, CustomLoginInput, formatDate} from '../component/custom';
 import {commonStyles} from '../public/styles';
@@ -96,64 +100,73 @@ const RegistrationScreen = ({navigation}) => {
     }
   };
   return (
-    <View style={styles.loginContainer}>
-      <View style={styles.upContainer}>
-        <Text style={commonStyles.title}>Welcome To</Text>
-        <Text style={commonStyles.subtitle}>슈퍼눈떠봐</Text>
-      </View>
-      <View style={styles.downContainer}>
-        <CustomLoginInput
-          text="이메일을 입력하세요."
-          condition={false}
-          func={setEmail}
-          value={email}
-        />
-        <View
-          style={{marginTop: height * -0.015, marginBottom: height * 0.015}}>
-          <CustomButton
-            text="인증번호 전송"
-            onPress={handleSendVerificationCode}
-          />
-        </View>
+    <KeyboardAvoidingView style={{flex: 1}}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={{flexGrow: 1}}>
+          <View style={styles.loginContainer}>
+            <View style={styles.upContainer}>
+              <Text style={commonStyles.title}>Welcome To</Text>
+              <Text style={commonStyles.subtitle}>슈퍼눈떠봐</Text>
+            </View>
+            <View style={styles.downContainer}>
+              <CustomLoginInput
+                text="이메일을 입력하세요."
+                condition={false}
+                func={setEmail}
+                value={email}
+              />
+              <View
+                style={{
+                  marginTop: height * -0.015,
+                  marginBottom: height * 0.015,
+                }}>
+                <CustomButton
+                  text="인증번호 전송"
+                  onPress={handleSendVerificationCode}
+                />
+              </View>
 
-        {isCodeSent && (
-          <CustomLoginInput
-            text="인증번호를 입력하세요"
-            condition={false}
-            func={setVerificationCode}
-            value={verificationCode}
-          />
-        )}
-        <CustomLoginInput
-          text="비밀번호를 입력하세요."
-          condition={true}
-          func={setPassword}
-          value={password}
-        />
-        <CustomLoginInput
-          text="비밀번호 확인"
-          condition={true}
-          func={setConfirmPassword}
-          value={confirmPassword}
-        />
-        <CustomLoginInput
-          text="닉네임 입력"
-          condition={false}
-          func={setUsername}
-          value={username}
-        />
-        {isCodeSent ? (
-          <View>
-            <CustomButton text="회원가입" onPress={handleRegister} />
+              {isCodeSent && (
+                <CustomLoginInput
+                  text="인증번호를 입력하세요"
+                  condition={false}
+                  func={setVerificationCode}
+                  value={verificationCode}
+                />
+              )}
+              <CustomLoginInput
+                text="비밀번호를 입력하세요."
+                condition={true}
+                func={setPassword}
+                value={password}
+              />
+              <CustomLoginInput
+                text="비밀번호 확인"
+                condition={true}
+                func={setConfirmPassword}
+                value={confirmPassword}
+              />
+              <CustomLoginInput
+                text="닉네임 입력"
+                condition={false}
+                func={setUsername}
+                value={username}
+              />
+              {isCodeSent ? (
+                <View>
+                  <CustomButton text="회원가입" onPress={handleRegister} />
+                </View>
+              ) : null}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Login')}
+                style={styles.loginButtonStyle}>
+                <Text style={styles.loginText}>로그인하기</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        ) : null}
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Login')}
-          style={styles.loginButtonStyle}>
-          <Text style={styles.loginText}>로그인하기</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 const styles = StyleSheet.create({
