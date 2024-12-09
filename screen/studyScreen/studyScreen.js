@@ -13,30 +13,49 @@ import {
   TextInput,
 } from 'react-native';
 import {
-  Camera,
   useCameraDevice,
   useFrameProcessor,
-  VisionCameraProxy,
-  Frame,
+  // VisionCameraProxy,
+  // Frame,
   runAsync,
-  runAtTargetFps,
+  // runAtTargetFps,
+  Camera,
 } from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
 import {useMainContext} from '../../component/mainContext';
 import {formatTime} from '../../component/subject';
 import {useSharedValue} from 'react-native-worklets-core';
+import {useFaceDetector} from 'react-native-vision-camera-face-detector';
+import {useHeaderHeight} from '@react-navigation/elements';
 
 const {width, height} = Dimensions.get('window');
-const plugin = VisionCameraProxy.initFrameProcessorPlugin('processImage');
+// const plugin = VisionCameraProxy.initFrameProcessorPlugin('processImage');
 
-function processImage(frame) {
-  'worklet';
-  if (plugin == null) {
-    throw new Error('Failed to load Frame Processor Plugin!');
-  }
-  return plugin.call(frame);
-}
+// function processImage(frame) {
+//   'worklet';
+//   if (plugin == null) {
+//     throw new Error('Failed to load Frame Processor Plugin!');
+//   }
+//   try {
+//     console.log('되나?');
+//     const result = plugin.call(frame);
+//     console.log('Plugin result:', result);
+
+//     if (
+//       Array.isArray(result) &&
+//       result.every(item => item.x != null && item.y != null)
+//     ) {
+//       return result;
+//     } else {
+//       console.warn('Invalid detection data:', result);
+//       return [];
+//     }
+//   } catch (error) {
+//     console.error('Error in plugin.call:', error.message, error.stack);
+//     return [];
+//   }
+// }
 
 const StudyScreen = ({route, navigation}) => {
   const {subject} = route.params;
@@ -50,34 +69,111 @@ const StudyScreen = ({route, navigation}) => {
   const [quizModalVisible, setQuizModalVisible] = useState(false);
   const [userAnswer, setUserAnswer] = useState(''); // 사용자가 입력한 정답
   const [quiz, setQuiz] = useState(null); // 퀴즈 데이터
+  const [detectedFaces, setDetectedFaces] = useState([]);
+  const [closedEyesTime, setClosedEyesTime] = useState(0);
 
   const intervalRef = useRef(null); // 타이머 취소용
   const unfocusedRef = useRef(unfocusedTime); // 최신 unfocusedTime 값 관리
   const alertRef = useRef(isAlertActive); // 최신 isAlertActive 값 관리
+  const closedEyesRef = useRef(closedEyesTime);
 
   const device = useCameraDevice('front');
   const alarmRef = useRef(null); // 알람 소리 관리
-  const detectedFaces = useSharedValue([]);
-  console.log('detectedFaces');
-  console.log(detectedFaces);
-  const frameProcessor = useFrameProcessor(frame => {
-    'worklet';
-    // 프레임 처리 작업을 비동기로 실행
-    runAsync(frame, () => {
+  const detectedFacesShared = useSharedValue([]);
+
+  const faceDetectionOptions = useRef({
+    performanceMode: 'accurate', // 정확도를 우선
+    landmarkMode: 'all', // 얼굴 랜드마크 활성화
+    contourMode: 'none', // 컨투어 비활성화
+    classificationMode: 'all', // 눈 상태 및 표정 분류 활성화
+    minFaceSize: 0.15, // 최소 얼굴 크기 설정
+    trackingEnabled: true, // 얼굴 추적 활성화
+    autoScale: false, // 스크린 좌표 자동 변환 비활성화
+  }).current;
+  const {detectFaces} = useFaceDetector(faceDetectionOptions);
+  const frameProcessor = useFrameProcessor(
+    frame => {
       'worklet';
-      runAtTargetFps(
-        1,
-        () => {
-          'worklet';
-          const result = processImage(frame); // 네이티브 플러그인 호출
-          console.log('Eye detected:', result); // 결과 로그 출력
-          detectedFaces.value = result;
-        },
-        [],
-      );
-    });
+      runAsync(frame, () => {
+        'worklet';
+        const faces = detectFaces(frame);
+        detectedFacesShared.value = faces;
+      });
+    },
+    [detectFaces],
+  );
+  const headerHeight = useHeaderHeight();
+  useEffect(() => {
+    console.log('Header Height:', headerHeight);
+  }, [headerHeight]);
+  const areEyesClosed = (leftEyeOpenProbability, rightEyeOpenProbability) => {
+    return leftEyeOpenProbability < 0.3 && rightEyeOpenProbability < 0.3;
+  };
+
+  // const frameProcessor = useFrameProcessor(frame => {
+  //   'worklet';
+  //   try {
+  //     // 프레임 처리 작업을 비동기로 실행
+  //     runAsync(frame, () => {
+  //       'worklet';
+  //       runAtTargetFps(
+  //         1,
+  //         () => {
+  //           'worklet';
+  //           const result = processImage(frame); // 네이티브 플러그인 호출
+  //           console.log('Eye detected:', result); // 결과 로그 출력
+  //           if (result.length > 0) {
+  //             detectedFacesShared.value = result;
+  //           }
+  //         },
+  //         [],
+  //       );
+  //     });
+  //   } catch (error) {
+  //     console.error('FrameProcessor Error: ', error);
+  //   }
+  // }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (detectedFaces.length > 0) {
+        const allEyesClosed = detectedFaces.every(face =>
+          areEyesClosed(
+            face.leftEyeOpenProbability,
+            face.rightEyeOpenProbability,
+          ),
+        );
+
+        if (allEyesClosed) {
+          setClosedEyesTime(prev => {
+            closedEyesRef.current = prev + 1;
+            return prev + 1;
+          });
+        } else {
+          setClosedEyesTime(0);
+          closedEyesRef.current = 0;
+        }
+      } else {
+        setClosedEyesTime(0);
+        closedEyesRef.current = 0;
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [detectedFaces]);
+
+  useEffect(() => {
+    const syncDetectedFaces = () => {
+      const sharedValue = detectedFacesShared.value || [];
+      if (sharedValue.length > 0) {
+        setDetectedFaces(sharedValue); // 새로운 얼굴 데이터가 있을 때만 업데이트
+      }
+    };
+    const interval = setInterval(syncDetectedFaces, 100); // 100ms 간격으로 상태 동기화
+    return () => clearInterval(interval); // 언마운트 시 인터벌 해제
   }, []);
-  runAtTargetFps(frameProcessor, 1);
+  useEffect(() => {
+    console.log('Updated detectedFaces:', detectedFaces);
+  }, [detectedFaces]);
   // 알람 재생
   const playAlarm = () => {
     if (!alarmRef.current) {
@@ -147,7 +243,7 @@ const StudyScreen = ({route, navigation}) => {
 
   // 집중하지 않은 상태 경고
   useEffect(() => {
-    if (unfocusedRef.current >= 60 && !alertRef.current) {
+    if (unfocusedRef.current >= 15 && !alertRef.current) {
       setIsAlertActive(true);
       alertRef.current = true;
       playAlarm();
@@ -242,6 +338,35 @@ const StudyScreen = ({route, navigation}) => {
     alertRef.current = false; // 알림 상태 초기화
     startElapsedTimeTimer(); // 타이머 재개
   };
+  // 얼굴 데이터 변환 함수
+  const cameraWidth = width;
+  const cameraHeight = width * 0.9;
+  const [cameraLayout, setCameraLayout] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+
+  // 카메라의 실제 렌더링 위치와 크기 측정
+  const handleCameraLayout = event => {
+    const {x, y, width, height} = event.nativeEvent.layout;
+    console.log('Camera Layout:', {x, y, width, height});
+    setCameraLayout({x, y, width, height});
+  };
+
+  // 얼굴 데이터 변환 함수
+  const scaleBounds = (bounds, frameWidth, frameHeight) => {
+    const scaleX = cameraLayout.width / frameWidth;
+    const scaleY = cameraLayout.height / frameHeight;
+
+    return {
+      x: bounds.x * scaleX,
+      y: bounds.y * scaleY - headerHeight,
+      width: bounds.width * scaleX,
+      height: bounds.height * scaleY,
+    };
+  };
 
   // 장치가 없거나 권한이 없을 때 로딩 표시
   if (!device || !hasPermission) {
@@ -262,10 +387,83 @@ const StudyScreen = ({route, navigation}) => {
           audio={false}
           isActive={hasPermission}
           style={studyingStyles.cameraStyle}
-          width={studyingStyles.cameraWidth}
-          height={studyingStyles.cameraHeight}
           frameProcessor={frameProcessor}
+          onLayout={handleCameraLayout} // 실제 크기 측정
         />
+        {detectedFaces.map((face, index) => {
+          const {
+            bounds,
+            landmarks,
+            leftEyeOpenProbability,
+            rightEyeOpenProbability,
+          } = face;
+
+          // 좌표 변환 함수 적용
+          const adjustedBounds = scaleBounds(bounds, 640, 480); // 프레임 크기에 맞게 변환
+          const adjustedLeftEye = scaleBounds(
+            {
+              x: 640 - landmarks.LEFT_EYE.x,
+              y: landmarks.LEFT_EYE.y,
+              width: 20,
+              height: 20,
+            },
+            640,
+            480,
+          );
+          const adjustedRightEye = scaleBounds(
+            {
+              x: 640 - landmarks.RIGHT_EYE.x,
+              y: landmarks.RIGHT_EYE.y,
+              width: 20,
+              height: 20,
+            },
+            640,
+            480,
+          );
+
+          // 눈 상태 색상
+          const leftEyeColor = leftEyeOpenProbability > 0.5 ? 'green' : 'red';
+          const rightEyeColor = rightEyeOpenProbability > 0.5 ? 'green' : 'red';
+
+          return (
+            <React.Fragment key={index}>
+              {/* 얼굴 바운딩 박스 */}
+              <View
+                style={[
+                  studyingStyles.faceBox,
+                  {
+                    left: adjustedBounds.x + 25,
+                    top: adjustedBounds.y,
+                    width: adjustedBounds.width,
+                    height: adjustedBounds.height,
+                  },
+                ]}
+              />
+              {/* 왼쪽 눈 상태 */}
+              <View
+                style={[
+                  studyingStyles.eyeBox,
+                  {
+                    left: adjustedLeftEye.x - 60, // 눈 중심 좌표 보정
+                    top: adjustedLeftEye.y - 10,
+                    backgroundColor: leftEyeColor,
+                  },
+                ]}
+              />
+              {/* 오른쪽 눈 상태 */}
+              <View
+                style={[
+                  studyingStyles.eyeBox,
+                  {
+                    left: adjustedRightEye.x - 60, // 눈 중심 좌표 보정
+                    top: adjustedRightEye.y - 10,
+                    backgroundColor: rightEyeColor,
+                  },
+                ]}
+              />
+            </React.Fragment>
+          );
+        })}
       </SafeAreaView>
       <View style={{alignItems: 'center'}}>
         <Text style={studyingStyles.subjectName}>{subject.title}</Text>
@@ -409,6 +607,20 @@ const studyingStyles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     textAlign: 'center',
+  },
+  faceBox: {
+    position: 'absolute',
+    borderColor: 'red',
+    borderWidth: 2,
+    borderRadius: 4,
+  },
+  eyeBox: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'black',
   },
   // 집중 화면 스타일
 });
