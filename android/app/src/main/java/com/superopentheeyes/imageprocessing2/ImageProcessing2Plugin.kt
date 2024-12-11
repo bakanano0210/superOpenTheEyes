@@ -27,7 +27,7 @@ class ImageProcessing2Plugin(
     init {
         try {
             // TFLite 모델 파일 로드
-            val modelFile = proxy.context.assets.open("face_detection_short_range.tflite").use { input ->
+            val modelFile = proxy.context.assets.open("drowsiness_detection.tflite").use { input ->
                 val modelBytes = input.readBytes()
                 ByteBuffer.allocateDirect(modelBytes.size).apply {
                     order(ByteOrder.nativeOrder())
@@ -44,59 +44,72 @@ class ImageProcessing2Plugin(
         return try {
             Log.d("ImageProcessingPlugin", "Processing frame started.")
 
-            // 프레임의 RGB 데이터 추출
-            val yuvBuffer = frame.image.planes[0].buffer
-            val width = frame.image.width
-            val height = frame.image.height
+            // Retrieve RGB data from arguments
+            val rgbData = (arguments?.get("resized") as? List<Double>)
+                ?.map{ it.toFloat() }
+                ?.toFloatArray()
+                ?: throw IllegalArgumentException("Missing or invalid 'resized' RGB data.")
+            Log.d("ImageProcessingPlugin", "Resized Data: ${rgbData.asIterable().take(10)}")
 
-            // Mediapipe TFLite 모델에 맞게 프레임을 128x128 크기로 변환
-            val resizedBuffer = resizeYUVtoRGB(yuvBuffer, width, height, 128, 128)
-            
-            Log.d("ImageProcessingPlugin", "Resized RGB Sample: ${resizedBuffer.sliceArray(0..9).joinToString()}")
-
-            // TFLite 모델 입력 및 출력 준비
-            val inputBuffer = ByteBuffer.allocateDirect(1 * 128 * 128 * 3 * 4).apply {
-                order(ByteOrder.nativeOrder())
-                put(resizedBuffer)
+            // Validate input size
+            if (rgbData.size != 26 * 34 * 3) {
+                throw IllegalArgumentException("Invalid RGB data size: ${rgbData.size}, expected: 640*480*3.")
             }
-            inputBuffer.rewind()
+            val grayscaleData = FloatArray(26 * 34) { i ->
+                val r = rgbData[i * 3]       // Red
+                val g = rgbData[i * 3 + 1]   // Green
+                val b = rgbData[i * 3 + 2]   // Blue
+                // Grayscale 변환 공식: 0.299*R + 0.587*G + 0.114*B
+                0.299f * r + 0.587f * g + 0.114f * b
+            }
 
-            val outputBuffer = Array(1) { Array(896) { FloatArray(16) } }
-            val inputShape = tflite?.getInputTensor(0)?.shape()
-            Log.d("ImageProcessingPlugin", "Expected Input Shape: ${inputShape?.contentToString()}")
+            // Prepare TFLite input buffer (640x480x3)
+            val inputBuffer = ByteBuffer.allocateDirect(26 * 34 * 4).apply {
+                order(ByteOrder.nativeOrder())
+                grayscaleData.forEach { pixel ->
+                    putFloat(pixel) // Normalize pixel values to [0, 1]
+                }
+            }
 
-            val outputShape = tflite?.getOutputTensor(0)?.shape()
-            Log.d("ImageProcessingPlugin", "Expected Output Shape: ${outputShape?.contentToString()}")
+            // inputBuffer.rewind()
+            // val inputTensor = tflite?.getInputTensor(0)
+            // Log.d("TFLiteModel", "Input Tensor Shape: ${inputTensor?.shape()?.contentToString()}")
+            // Log.d("TFLiteModel", "Input Tensor Data Type: ${inputTensor?.dataType()}")
+            // Prepare TFLite output buffer
+            val outputBuffer = Array(1) { FloatArray(1) }
 
-            Log.d("ImageProcessingPlugin", "Input Buffer Capacity: ${inputBuffer.capacity()}")
-
-            // 모델 실행
+            // Run inference
             tflite?.run(inputBuffer, outputBuffer)
             Log.d("ImageProcessingPlugin", "Raw Output: ${outputBuffer.contentDeepToString()}")
 
-            // 결과 파싱
-            val detections = parseDetectionOutput(outputBuffer[0], width, height).take(1)
-            Log.d("ImageProcessingPlugin", "Detections: $detections")
-            Log.d("ImageProcessingPlugin", "Input Buffer Size: ${inputBuffer.capacity()}")
-            Log.d("ImageProcessingPlugin", "Output Shape: ${outputBuffer.size}")
+            // Format result as requested
+            val detectionResult = mapOf("0" to outputBuffer[0][0].toDouble())
+            Log.d("ImageProcessingPlugin", "Formatted Result: $detectionResult")
 
-            // JSON-호환 데이터만 반환
-            detections.map { detection ->
-                mapOf(
-                    "x" to detection["x"],
-                    "y" to detection["y"],
-                    "width" to detection["width"],
-                    "height" to detection["height"],
-                    "score" to detection["score"]
-                )
-            }
-        }catch (e: IllegalArgumentException) {
-            Log.e("ImageProcessingPlugin", "IllegalArgumentException: ${e.message}")
-            null // 예외가 발생해도 JS로 전달하지 않고 안전하게 처리
+            // Return JSON-compatible result
+            detectionResult
         } catch (e: Exception) {
             Log.e("ImageProcessingPlugin", "Unexpected error: ${e.message}")
             null
         }
+    }
+
+    private fun convertYUVtoRGB(yuvBuffer: ByteBuffer, width: Int, height: Int): ByteArray {
+        val yuvMat = Mat(height + height / 2, width, CvType.CV_8UC1)
+        val yuvBytes = ByteArray(yuvBuffer.remaining())
+        yuvBuffer.get(yuvBytes)
+        yuvMat.put(0, 0, yuvBytes)
+
+        val rgbMat = Mat()
+        Imgproc.cvtColor(yuvMat, rgbMat, Imgproc.COLOR_YUV2RGB_NV21)
+
+        val rgbBuffer = ByteArray(width * height * 3)
+        rgbMat.get(0, 0, rgbBuffer)
+
+        yuvMat.release()
+        rgbMat.release()
+
+        return rgbBuffer
     }
     private fun resizeYUVtoRGB(
         yuvBuffer: ByteBuffer,

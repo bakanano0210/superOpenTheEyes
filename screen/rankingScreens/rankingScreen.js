@@ -69,9 +69,7 @@ const GroupRankingTap = ({data}) => {
       <Text style={styles.rankText}>{item.rank}</Text>
       <Image
         source={
-          item.imageUri
-            ? {uri: item.imageUri}
-            : require('../../assets/exampleImg.png')
+          item.imageUri ? {uri: item.imageUri} : require('../../assets/s.png')
         }
         resizeMode="contain"
         style={styles.profileImage}

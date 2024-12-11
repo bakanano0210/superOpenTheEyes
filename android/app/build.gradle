@@ -134,6 +134,7 @@ dependencies {
     }
 
     implementation 'org.tensorflow:tensorflow-lite:2.12.0'
+    implementation project(':react-native-reanimated') // Reanimated 추가
 
 }
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle");

@@ -8,6 +8,10 @@ import {
   Alert,
   Dimensions,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {commonStyles} from '../public/styles';
@@ -104,27 +108,31 @@ export const SubjectModal = ({
   };
   return (
     <Modal transparent visible={visible} animationType="fade">
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent]}>
-          <Text style={styles.modalTitle}>과목 명</Text>
-          <TextInput
-            style={styles.modalInput}
-            placeholder="과목을 입력하세요"
-            value={subjectTitle}
-            onChangeText={onChangeTitle}
-          />
-          <View style={styles.modalButtonRow}>
-            <TouchableOpacity style={styles.modalButton} onPress={exit}>
-              <Text style={commonStyles.buttonText}>취소</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
-              <Text style={commonStyles.buttonText}>
-                {isEdit ? '수정' : '등록'}
-              </Text>
-            </TouchableOpacity>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.modalOverlay}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>과목 명</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="과목을 입력하세요"
+              value={subjectTitle}
+              onChangeText={onChangeTitle}
+            />
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity style={styles.modalButton} onPress={exit}>
+                <Text style={commonStyles.buttonText}>취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
+                <Text style={commonStyles.buttonText}>
+                  {isEdit ? '수정' : '등록'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
